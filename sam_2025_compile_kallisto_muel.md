@@ -1,5 +1,5 @@
-Modified version of 2025_compile_kallisto_muel.sh that automatically locates abundance.tsv files within a given directory.
-
+# Modified version of 2025_compile_kallisto_muel.sh that automatically locates abundance.tsv files within a given directory.
+```R
 #!/bin/bash
 #SBATCH --job-name=compile_kallisto_counts
 #SBATCH --nodes=1
