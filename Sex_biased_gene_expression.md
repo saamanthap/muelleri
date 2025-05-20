@@ -1,5 +1,5 @@
 # Analysis of masculinization of gene expression (Kallisto, DeSeq2)
-### Copied from Ben's repo and annotated by me
+### Copied from [Ben's repo](https://github.com/evansbenj/2021_tad_ko_RNAseq/blob/main/Sex_biased_gene_expression.md?plain=1) and annotated by me
 ```R
 library(edgeR)
 library(tximport)
