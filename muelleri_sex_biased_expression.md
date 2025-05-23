@@ -1,6 +1,6 @@
 # DESeq2 R script for analyzing sex-biased expression
 
-'''R
+```R
 # First load in the packages required by this script
 library(DESeq2)
 #library(apeglm)
@@ -131,4 +131,4 @@ View(rsquare)
 
 # View the dispersion plot
 plotDispEsts(dds)
-'''
+```
