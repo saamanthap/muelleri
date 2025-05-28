@@ -107,9 +107,11 @@ head(femonlyexpression[order(femonlyexpression$pvalue),])
 #Check how many of the contigs with female-biased expression have an expression level of ZERO in all males
 dim(femonlyexpression)
 
+#save femonlyexpression as a csv
+as.data.frame(femonlyexpression)
+write.csv(femonlyexpression, "femonlyexpression.csv")
 
-
-# "Sanity check" to make sure 
+# "Sanity check" to make sure distribution is narrower between identical biological replicates than between different genotypes
 norm <- as.data.frame(counts(dds, normalized=T))
 rsquare <- data.frame(matrix(ncol = ncol(norm),
                              nrow = ncol(norm)))
@@ -131,4 +133,82 @@ View(rsquare)
 
 # View the dispersion plot
 plotDispEsts(dds)
+
+# Install bigPint stuff (necessary for the following plots)
+library(devtools)
+install_github("lindsayrutter/bigPint")
+library(bigPint)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+
+str(counts, strict.width="wrap")
+
+# Make a copy of counts
+countscopy <- counts
+library(tibble)
+# Turn the row names into the first column called "ID"
+countscopy <- tibble::rownames_to_column(countscopy, "ID")
+# Rename the columns
+colnames(countscopy) <- c("ID", "F.1", "F.2", "M.1", "F.3", "F.4", "F.5", "F.6", "M.2", "M.3", "F.7")
+# Reorder the columns so that males and females are grouped together
+countscopy <- countscopy[ , c("ID","F.1","F.2","F.3","F.4","F.5","F.6","F.7","M.1","M.2","M.3")]
+# Check the structure of the data
+str(countscopy, strict.width="wrap")
+# Make a standardized version of the data
+data_st <- as.data.frame(t(apply(as.matrix(countscopy[,-1]), 1, scale)))
+data_st$ID <- as.character(countscopy$ID)
+data_st <- data_st[,c(length(data_st), 1:length(data_st)-1)]
+colnames(data_st) <- colnames(countscopy)
+nID <- which(is.nan(data_st[,2]))
+data_st[nID,2:length(data_st)] <- 0
+str(data_st, strict.width = "wrap")
+
+# Plot the side-by-side boxplot
+ret <- plotPCP(data = data_st, saveFile = FALSE)
+ret[["F_M"]]
+
+# Plot the scatterplot matrix (this plot has not worked so far and usually crashes R on my laptop... data may be too big)
+ret <- plotSM(data = countscopy, saveFile = FALSE)
+ret[["F_M"]]
+
+#Attempt to make a parallel coordinates plot
+library(edgeR)
+library(data.table)
+
+rownames(countscopy) = countscopy[,1]
+
+y = DGEList(counts = countscopy[,-1])
+group = c (1,1,1,1,1,1,1,2,2,2)
+y = DGEList(counts=y, group=group)
+Group = factor(c(rep("F",7), rep("M",3)))
+design <- model.matrix(~0+Group, data=y$samples)
+colnames(design) <- levels(Group)
+y <- estimateDisp(y, design)
+fit <- glmFit(y, design)
+
+dataMetrics <- list()
+
+contrast=rep(0,ncol(fit))
+contrast[1]=1
+contrast[2]=-1
+lrt <- glmLRT(fit, contrast=contrast)
+lrt <- topTags(lrt, n = nrow(y[[1]]))[[1]]
+
+lrt <- setDT(lrt, keep.rownames = TRUE)[]
+colnames(lrt)[1] = "ID"
+lrt <- as.data.frame(lrt)
+
+dataMetrics[[paste0(colnames(fit)[1], "_", colnames(fit)[2])]] <- lrt
+str(dataMetrics, strict.width = "wrap")
+
+# these commands actually plot the data
+ret <- plotPCP(data_st, dataMetrics, threshVal = 0.1, lineSize = 0.3, lineColor = "magenta", saveFile = FALSE)
+ret[["F_M"]] + ggtitle("DEGs (FDR < 0.1)")
+
+# Clustering DEGs to make more manageable plots
+ret <- plotClusters(data_st, dataMetrics, threshVal = 0.1, nC = 2, 
+                    colList = c("#00A600FF","#CC00FFFF"), lineSize = 0.5, verbose = FALSE)
+plot(ret[["F_M_2"]])
+
 ```
