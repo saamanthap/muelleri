@@ -111,6 +111,15 @@ dim(femonlyexpression)
 as.data.frame(femonlyexpression)
 write.csv(femonlyexpression, "femonlyexpression.csv")
 
+#subset the femonlyexpression data frame. Now it only includes transcripts with female ONLY expression and a LFC < -20
+extremefemonlyexpression <- femonlyexpression[femonlyexpression$log2FoldChange <= -20,]
+dim(extremefemonlyexpression)
+#Intriguing plot... most highly expressed genes are least significant
+plot(extremefemonlyexpression$pvalue, extremefemonlyexpression$log2FoldChange)
+#Take only the transcript names and then concatenate them in a list with one name per line
+extremefemonlyexpression <- rownames(extremefemonlyexpression)
+cat(extremefemonlyexpression, sep = "\n")
+
 # "Sanity check" to make sure distribution is narrower between identical biological replicates than between different genotypes
 norm <- as.data.frame(counts(dds, normalized=T))
 rsquare <- data.frame(matrix(ncol = ncol(norm),
