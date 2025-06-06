@@ -18,7 +18,7 @@
 * Pull out unique transcript names based on the outfile format (useful if a transcript finds multiple matches, but can be misleading for matches with low alen/qlen ratio)
 #### Strategies to get annotations: 
 *Note: XENLA_10.1_Xenbase.transcripts has conveniently formatted gene names but 2025_XL_transcriptome does not*
-* Collect fasta files from a list of names of transcripts of interest. Blast against the human genome, making sure to use the -task blastn flag
+* Collect fasta files from a list of names of transcripts of interest. Blast against the human genome (or another appropriate annotated genome), making sure to use the -task blastn flag
 * If you have gene IDs and need gene names, you can search a line-separated list on the [Gene Ontology](https://www.pantherdb.org/) website
 
 
