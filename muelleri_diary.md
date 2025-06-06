@@ -1,6 +1,6 @@
 # Muelleri Project Diary
 ## Counts  
-* [Automatically collect abundance files from a directory to compile counts](https://github.com/saamanthap/muelleri/blob/main/sam_2025_compile_kallisto_muel.md)
+[Automatically collect abundance files from a directory to compile counts](https://github.com/saamanthap/muelleri/blob/main/sam_2025_compile_kallisto_muel.md)
 
 ## DE analysis in R  
 [DESeq2 workflow](https://github.com/saamanthap/muelleri/blob/main/muelleri_differential_gene_expression.md)
