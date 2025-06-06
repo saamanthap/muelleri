@@ -25,3 +25,9 @@ NEED TO FIX THIS SO THAT IT ONLY MATCHES WHOLE WORDS
 ```
 cut -d'.' -f1 ../XENLA_10.1_Xenbase.transcripts/gene_names.txt | grep -F - ./GenePageAnatomyOntologyMapping.txt | less
 ```
+If you need to eliminate identical gene names from the list:  
+*Note: -f- allows grep to take standard input*
+```
+ awk '{a[$1]++} END{for(b in a) print b}' ../XENLA_10.1_Xenbase.transcripts/gene
+_names.txt | grep -f- ./GeneExpression_laevis.txt | less
+```
