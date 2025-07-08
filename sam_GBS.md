@@ -117,5 +117,51 @@ samtools index $sortedbam
 # limit to five (or whatever) jobs simultaneously
 # Run from the directory containing trimmed fastq files and give the correct relative path to for.Sam
 ```
+## Add readgroups
+My script is called **readgroups.Sam**:
+```
+#!/bin/sh
 
+# Run using parallel -j x readgroups.Sam ::: *_sorted.bam &>> rg_err.txt &
+# Run from the directory that contains the sorted.bam files
+# Make sure that you give the correct relative (or absolute path) to the readgroups.Sam file
+
+picard=/opt/local/picard-tools/picard.jar
+input=$1
+output=$(basename $1 _sorted.bam)_rg.bam
+rglibrary=$(basename $1)
+rgsample=$(basename $1)
+rgunit=$(basename $1)
+
+java -jar $picard AddOrReplaceReadGroups \
+        I=$input \
+        O=$output \
+        RGID=4 \
+        RGLB=$rglibrary \
+        RGPL=ILLUMINA \
+        RGPU=$rgunit \
+        RGSM=$rgsample
+```
+## GATK HaplotypeCaller
+My script is called **haplo.Sam**:
+```
+#!/bin/sh
+
+# Run like this: parallel -j x ../haplo.Sam ::: *_rg.bam &>> haplo_err.txt &
+# x is the maximum number of jobs to run at one time
+# Run from the directory that contains the _rg.bam files - in my case, \2\scratch\samp\muel_bam\
+# Make sure to give the correct relative path to haplo.Sam
+# In this case I am using the laevis reference genome (downloaded from xenbase)
+
+gatk=/home/samp/opt/local/gatk/GenomeAnalysisTK.jar
+ref=/2/scratch/samp/XENLA_10.1_genome/XENLA_10.1_genome.fa
+input=$1
+output=$(basename $1 _rg.bam).g.vcf.gz
+
+java -Xmx24G -jar $gatk HaplotypeCaller \
+        -R $ref \
+        -I $input \
+        -O $ouput \
+        -ERC GVCF
+```
 
