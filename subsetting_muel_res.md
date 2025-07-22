@@ -14,6 +14,14 @@ The file looks like this:
 "TRINITY_DN11162_c0_g2_i3"      4.10513861913165        1.07843868312973        1.6348334569038 0.659662718899929       0.509470296024432       0.999986614612765
 "TRINITY_DN6591_c0_g1_i9"       10.5436807514657        -1.09354687729788       1.86950548023553        -0.584939112968051      0.558588657852492       0.999986614612765
 ```
+Fixing the file so that all values are separated by tabs:
+```
+awk -v OFS='\t' '{$1=$1; print}' your_file.txt > fixed_file.txt
+```
+
+
+
+
 Note that not all lines are perfectly tab-delimited (not sure why). Most of the time, I want to filter by log2FoldChange (the third column) and pvalue (the sixth column). The headings row is treated as a regular row, so be sure to exclude or ignore it.  
 
 Negative log2FoldChange values imply female-biased expression. Positive log2FoldChange values imply male-biased expression.
