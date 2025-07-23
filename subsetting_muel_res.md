@@ -2,7 +2,8 @@
 muel_res.txt contains the output of the DESeq2 analysis of differential expression. The only information that has been pre-filtered is transcripts with a count sum of less than 2 for all samples.  
 
 The file looks a bit wonky, but that is because the tabs are different sizes. I have checked and everything is properly tab-delimited and can be reliable filtered by column: 
-```transcriptID    baseMean        log2FoldChange  lfcSE   stat    pvalue  padj
+```
+transcriptID    baseMean        log2FoldChange  lfcSE   stat    pvalue  padj
 TRINITY_DN37947_c0_g1_i1        2.32589035223894        -1.10133580543906 1.0727632257983  -1.02663456292463       0.304592572718961       NA
 TRINITY_DN816_c0_g1_i2  19.1745585951407        0.102368878209317       0.694342719096557  0.147432781238801       0.8827904325416 0.999986614612765
 TRINITY_DN17376_c0_g1_i14       17.5829886832452        -1.60326581098384 1.74816592907749 -0.917113063649452      0.359083396197561       0.999986614612765
@@ -31,4 +32,11 @@ Now I'm going to blast the fem_0.05.fasta file I prepared against the blast data
 module load StdEnv/2023 gcc/12.3 blast+/2.14.1
 blastn -query fem_0.05.fasta -db ../../2021_XL_v10_refgeno
 me/XENLA_10.1_genome_blastable -outfmt 6 -out fem_0.05_to_XL_genome.out
+```
+Or you can use a more detailed output format: 
+```
+module load StdEnv/2023 gcc/12.3 blast+/2.14.1
+blastn -query fem_0.05.fasta -db ../../2021_XL_v10_refgenome/XENLA_10.1_genome_blastable -outfmt "6 qseqid sseqid stitle pident length mismatch gapopen qlen qstart qend sstart send evalue bitscore" -out fem_0.05_to_XL_genome.out
+```
+The above results are kind of useless since the blastable database does not have annotations. I'm going to try the human transcriptome next: 
 ```
