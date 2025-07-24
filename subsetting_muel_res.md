@@ -38,5 +38,35 @@ Or you can use a more detailed output format:
 module load StdEnv/2023 gcc/12.3 blast+/2.14.1
 blastn -query fem_0.05.fasta -db ../../2021_XL_v10_refgenome/XENLA_10.1_genome_blastable -outfmt "6 qseqid sseqid stitle pident length mismatch gapopen qlen qstart qend sstart send evalue bitscore" -out fem_0.05_to_XL_genome.out
 ```
-The above results are kind of useless since the blastable database does not have annotations. I'm going to try the human transcriptome next: 
+The above results are kind of useless since the blastable database does not have annotations. I'm going to try the human transcriptome next. The dc-megablast task is optimized for dissimilar sequences: 
+```
+blastn -query fem_0.05.fasta -db ../../human_transcriptome/gencode.v42.transcripts.fa_blastable -outfmt 6 -out fem_0.05_to_human_transcriptome.out -task dc-megablast
+```
+Notes on outformat 6:
+```
+qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore
+```
+I'm going to try filtering by percent identity (3rd tab-delimited column): 
+```
+awk -F'\t' '$3 >= 90' fem_0.05_to_human_transcriptome.out |
+```
+I could also sort by e-value to glance at the best hits. The -g flag allows sort to understand scientific notation: 
+```
+sort -g -k 11 fem_0.05_to_human_transcriptome.out
+```
+Now I want to blast against the laevis transcriptome: 
+```
+blastn -query fem_0.05.fasta  -db ../../2025_XL_transcriptome/xlaevisMRNA.fasta_blastable -outfmt 6 -out fem_0.05_to_laevis_transcriptome.out
+```
+This syntax gets you more information in your results: 
+```
+blastn -query fem_0.05.fasta -db ../../2025_XL_transcriptome/xlaevisMRNA.fasta_blastable -outfmt "6 qseqid sseqid stitle pident length mismatch gapopen qstart qend sstart send evalue bitscore" -out TEST_fem_0.05_XL_transcriptome.out
+```
+The output looks like this: 
+```
+TRINITY_DN7055_c0_g1_i10        gi|1069361438|gb|XM_018265530|      gi|1069361438|gb|XM_018265530| PREDICTED: Xenopus laevis dystonin-like (LOC108718009), transcript variant X2, mRNA      94.341  4418    247     2       856     5270    1195        5612    0.0     6770
+```
+Sort by e-value, keep only hits with higher than 85% percent-identity, print out gene names only:
+```
+deseq2_data]$ sort -g -k 12 TEST_fem_0.05_XL_transcriptome.out | awk -F'\t' '$4 > 85' | cut -f 3 | cut -d'|' -f5 |  awk 'sub(/.*GenePageIDs:/,""){print $1}'
 ```
