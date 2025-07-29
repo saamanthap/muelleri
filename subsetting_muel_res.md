@@ -70,3 +70,5 @@ Sort by e-value, keep only hits with higher than 85% percent-identity, print out
 ```
 deseq2_data]$ sort -g -k 12 TEST_fem_0.05_XL_transcriptome.out | awk -F'\t' '$4 > 85' | cut -f 3 | cut -d'|' -f5 |  awk 'sub(/.*GenePageIDs:/,""){print $1}'
 ```
+## Working with STAR results
+
