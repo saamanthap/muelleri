@@ -1,9 +1,30 @@
-Make the samples.txt file: 
+I ran Trinity on Brian's machine. (Specifically info113, since it wasn't too busy at the time.) My script is called "trinity_script.sh":
 ```
-for r1_file in *_R1.fq.gz; do base_name="${r1_file%_R1.fq.gz}"; r2_file="${base_name}_R2.fq.gz"; if [[ -f "$r2_file" ]]; then common_prefix=$(echo "$base_name" | cut -d'_' -f1-3); species_prefix=$(echo "$base_name" | cut -d'_' -f1-2); echo -e "${species_prefix}\t${common_prefix}\t${r1_file}\t${r2_file}"; fi; done > processed_filenames.txt
+#!/bin/bash
+
+lin=/2/scratch/samp/newly_trimmed_reads/*R1.fq.gz
+rin=/2/scratch/samp/newly_trimmed_reads/*R2.fq.gz
+
+ll=$(
+        for l in ${lin}; do
+                basename $l
+        done
+)
+
+rr=$(
+        for r in ${rin}; do
+                basename $r
+        done
+)
+
+lstring=$(echo ${ll} | sed 's/ /,/g')
+rstring=$(echo ${rr} | sed 's/ /,/g')
+
+/opt/local/trinity/trinityrnaseq-Trinity-v2.4.0/Trinity --seqType fq --left ${lstring} --right ${rstring} --max_memory 50G --CPU 6 --output sam_trinity_assembly
+
 ```
-The text file looks like this: 
+I used this command, from the directory that contains the trimmed reads ("newly_trimmed_reads"):
 ```
-X_muelleri      X_muelleri_tad31        X_muelleri_tad31_S11_L001__trim_cut_polyA_R1.fq.gz      X_muelleri_tad31_S11_L001__trim_cut_polyA_R2.fq.gz
-X_muelleri      X_muelleri_tad32        X_muelleri_tad32_S12_L001__trim_cut_polyA_R1.fq.gz      X_muelleri_tad32_S12_L001__trim_cut_polyA_R2.fq.gz
+ ../trinity_script.sh 1> trinity.out 2> trinity.err &
 ```
+
