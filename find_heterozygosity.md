@@ -131,7 +131,7 @@ while ( my $line = <DATAINPUT>) {
 							$switch2 = 9;
 							$num_het_sons+=1;
 						}
-						elsif(($pat1[0] ne $pat1[1])&&($switch1 == 9)){
+						elsif(($pat1[0] ne $pat1[1])&&($switch2 == 9)){
 							# this son is heteroz, but not the first one
 							#print "badpatd ",$columns[0],"\t",$columns[1]," ",$pat[0]," ",$pat[1]," ";
 							$num_het_sons+=1;
@@ -150,6 +150,7 @@ while ( my $line = <DATAINPUT>) {
 				# all the daughters with genotypes are homoz
 				# at least five sons with a genotypes are heterozygous
 				print OUTFILE2 $columns[0],"\t",$columns[1],"\n";
+				#outfile 2 contains the positions where all daughters are homozygous and at leas 5 sons are heterozygous
 			}
 			#elsif(($switch2 == 1)&&($switch1 == 9)&&($num_daughters == $num_het_daughters)){
 				# all the sons with genotypes are homoz
@@ -161,6 +162,7 @@ while ( my $line = <DATAINPUT>) {
 				# all the sonz with genotypes are homoz
 				# at least five daughters with a genotype are heterozygous
 				print OUTFILE $columns[0],"\t",$columns[1],"\n";
+				#outfile 1 contains the positions where all the sons are homozygous and at leas five daughters are heterozygous. This is closest to the conditions I want for muelleri, although I probably want ALL daughters with genotypes to be heterozygous and all sons with genotypes to be homozygous.
 			}
 			
 		} # end else
