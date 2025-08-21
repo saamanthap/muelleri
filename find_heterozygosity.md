@@ -1,6 +1,10 @@
+Annotated (by me) version of Ben's script, which is described as: "if a parent is not available (cal) this script can get positions that are homozygous in all individuals of one sex and heterozygous in at least (5) individuals of the other sex (separately for males and females)"
+```
 #!/usr/bin/env perl
 use strict;
 use warnings;
+#"strict" forces you to declare variables using "my"
+#"warnings" enables Perl's warning system 
 
 # This program reads in a vcf file with genotypic information from
 # a family and identifies positions that
@@ -22,34 +26,43 @@ my $vcf = $ARGV[0];
 my $sexes = $ARGV[1];
 my $outputfile = $ARGV[2];
 my $outputfile2 = $ARGV[3];
+#$ARGV[0] ect. are the built-in arrays for commandline arguments (since it is an array, the first argument is denoted[0]). The first argument is the vcf file you want to analyze, the second is a string of characters that represents the sexes (strings of 1s and 0s in the same order as the samples that denote male or female). The third and fourth arguments are the names you want for two different outfiles.
+
 my @columns;
 my @pat;
 my @pat1;
 my $x;
+#these are local variables that you're going to use later
 
 my @sexes = split("",$sexes);
+#this is going to split the sexes variable (which is a string of numbers) into an array of single characters, each one representing the sex of a sample
 
 unless (open(OUTFILE, ">$outputfile"))  {
 	print "I can\'t write to $outputfile   $!\n\n";
 	exit;
 }
 print "Creating output file: $outputfile\n";
+#"unless (...)" basically means "if the conditions in the round brackets aren't met, do x". In this case, if the outfile can't be opened, then print "I can't write to $outputfile" and $!, which denotes the error message associated with the last command, which was the attempt to open the outfile. Then the script exits.
+#if the script WAS able to open or newly create the outfile, it prints "Creating output file $outputfile". Additionally, if the outfile already exists, the redirection operator ">" ensures that all the content in the file is deleted, so it can start out blank.
 
 unless (open(OUTFILE2, ">$outputfile2"))  {
 	print "I can\'t write to $outputfile2  $!\n\n";
 	exit;
 }
 print "Creating output file: $outputfile2\n";
+#same thing for the second output file
 
 
-
-if ($vcf =~ /.gz$/) {
+if ($vcf =~ /.gz$/) { 
 	#open DATAINPUT, '<:gzip', $vcf or die "Could not read from $vcf: $!";
 	open(DATAINPUT, "gunzip -c $vcf |") || die "can’t open pipe to $vcf";
 }
+#check if the vcf file ends with ".gz", indicating that it is gzipped. If so, open it using "gunzip" and pipe the decompressed output directly to the script. The "||" is the logical OR operator in Perl. It means that if the vcf cannot be decompressed, read and piped to the script, the script should "die" (exit with an error message) and print "Could not read from $vcf" with the associated "$!", which you should recall is the error message associated with the last command (which was the attempt to decompress the file)
+
 else {
 	open DATAINPUT, $vcf or die "Could not read from $vcf: $!";
 }
+#if the file does not have a .gz ending, assume it is not compressed and simply open it or "die" (exit with an error message)
 
 my $number_of_samples=0;
 my $switch1=0;
@@ -58,7 +71,7 @@ my $num_daughters=0;
 my $num_het_daughters=0;
 my $num_sons=0;
 my $num_het_sons=0;
-
+#declare a bunch of local variables and start by setting them all to zero.
 
 while ( my $line = <DATAINPUT>) {
 	@columns=split("	",$line);
@@ -152,6 +165,8 @@ while ( my $line = <DATAINPUT>) {
 			
 		} # end else
 } # end while
+
+```
 close DATAINPUT;
 close OUTFILE;
 close OUTFILE2;
