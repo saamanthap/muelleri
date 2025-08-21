@@ -94,11 +94,11 @@ while ( my $line = <DATAINPUT>) {
 			$num_het_sons=0; #these are all variables that i will start by setting to zero
 			for ($x = 1 ; $x <= $number_of_samples; $x++ ){ # cycle through each sample, starting with sample 1. The sample number is "x", the "xth sample". "$x++" means that x increases by 1 each iteration of the loop. The loop continues so long as x is less than or equal to the number of samples, ensuring that all samples are genotyped. 
 				if($sexes[$x-1] != 2){ # only consider samples that are included ("2" in the sexes string means to exclude a sample)
-					@pat = split(":",$columns[$x+8]); # this is the whole genotype and other info from the vcf file
-					@pat1 = split(/[\|\/]/,$pat[0]); # this is only the genotype
-					# check if the daughters are homozygous or missing
-					if(($pat[0] ne './.')&&($pat[0] ne '.|.')&&
-					($pat[0] ne '.')&&($sexes[$x-1] == 1)){ # this is a daughter with a genotype
+					@pat = split(":",$columns[$x+8]); # this is the whole genotype and other info from the vcf file. "$columns[$x+8]" gets the column for the current sample (the sample number x + 8 in order to skip the default vcf columns). The genotype info is colon-separated and gets stored in an array called @pat
+					@pat1 = split(/[\|\/]/,$pat[0]); #this gets just the two alleles from the genotype string. This line split by either an "\" (phased allele) or an "|" (unphased allele). The alleles are stored in the @pat1 array
+					# check if the daughters are homozygous or missing. This is the daughter part of the loop.
+					if(($pat[0] ne './.')&&($pat[0] ne '.|.')&& 
+					($pat[0] ne '.')&&($sexes[$x-1] == 1)){ # this is a daughter with a genotype. 
 					# this is a daughter
 					$num_daughters+=1;
 						if(($pat1[0] eq $pat1[1])&&($switch1 != 9)){
