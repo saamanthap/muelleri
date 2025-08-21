@@ -98,27 +98,24 @@ while ( my $line = <DATAINPUT>) {
 					@pat1 = split(/[\|\/]/,$pat[0]); #this gets just the two alleles from the genotype string. This line split by either an "\" (phased allele) or an "|" (unphased allele). The alleles are stored in the @pat1 array
 					# check if the daughters are homozygous or missing. This is the daughter part of the loop.
 					if(($pat[0] ne './.')&&($pat[0] ne '.|.')&& 
-					($pat[0] ne '.')&&($sexes[$x-1] == 1)){ # this is a daughter with a genotype. 
+					($pat[0] ne '.')&&($sexes[$x-1] == 1)){ # this is a daughter with a genotype. So this part of the loop only executes if the current sample is "1" in the sexes array (meaning female) and if the genotype is NOT missing
 					# this is a daughter
-					$num_daughters+=1;
-						if(($pat1[0] eq $pat1[1])&&($switch1 != 9)){
-							# this daughter is homoz 
-							$switch1 = 1;
+					$num_daughters+=1; 
+						if(($pat1[0] eq $pat1[1])&&($switch1 != 9)){ #if $pat1[0] is equal to $pat1[1], then the genotypes are the same and the daughter is homozygous at this position. If $switch1 != (not equal) to 9, then a heterozygous daughter has not been found yet. You want to find sites where ALL daughters are homozygous
+							$switch1 = 1; #reset the switch to 1, meaning all daughters so far have been homozygous
 							#print "goodpatd ",$columns[0],"\t",$columns[1]," ",$pat[0]," ",$pat[1]," ";
 						}
-						elsif(($pat1[0] ne $pat1[1])&&($switch1 != 9)){
-							# this daughter is the first heteroz
+						elsif(($pat1[0] ne $pat1[1])&&($switch1 != 9)){ #if the alleles are not equal and switch1 does not equal 9, then this is the FIRST heterozgous daughter
 							#print "badpatd ",$columns[0],"\t",$columns[1]," ",$pat[0]," ",$pat[1]," ";
-							$switch1 = 9;
-							$num_het_daughters+=1;
+							$switch1 = 9; #set switch1 to 9, indicating that you HAVE found a het daughter
+							$num_het_daughters+=1; #increase the number of het daughters by one
 						}	
-						elsif(($pat1[0] ne $pat1[1])&&($switch1 == 9)){
-							# this daughter is heteroz, but not the first one
+						elsif(($pat1[0] ne $pat1[1])&&($switch1 == 9)){ #if the alleles are not the same, then this daughter is het for this position, but is not the first het daughter that has been found
 							#print "badpatd ",$columns[0],"\t",$columns[1]," ",$pat[0]," ",$pat[1]," ";
 							$num_het_daughters+=1;
 						}	
 					}
-					# check if the sons are heterozygous or missing
+					# check if the sons are heterozygous or missing. This is the sons part of the loop. It functions the same as the daughter part, but it checks for the value of items in the sexes array to be "0" meaning male
 					elsif(($pat[0] ne './.')&&($pat[0] ne '.|.')&&
 					($pat[0] ne '.')&&($sexes[$x-1] == 0)){
 						# this is a son
