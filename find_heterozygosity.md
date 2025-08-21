@@ -81,16 +81,19 @@ while ( my $line = <DATAINPUT>) {
 				$number_of_samples = scalar(@columns)-9;
 				print "Number of samples ",$number_of_samples,"\n";
 			}
+#the while loop continues processing the vcf file until it runs out of lines
+#first, each line is split according to tabs and stores the parts in the "columns" array, this way the different fields are accessible each in their own array.
+#columns[0] is the first field. Check if each line in the first field starts with a "#", which would indicate that they are headers. If one of these headers is "#CHROM", this means the script has found the last header line. You can use this last header line to calculate how many samples you have in your data. Count the scalar number of columns and subtract 9 (for the 9 default vcf columns), leaving you with the number of columns that are samples. Finally, print the number of samples
 		}
-		else{ # this is the genotype data
-			$switch1=0;
-			$switch2=0;
+		else{ # this is the genotype data #this "else" part of the loop processes lines that DON'T start with "#", meaning they are not headers. This loops through EACH variant site, which is represented by a single line in the vcf file. For each line, the script wants to figure out the genotype at this variant site of all sons and all daughters.
+			$switch1=0; #tracks the genotyping status of daughters. Gets reset for each new variant site
+			$switch2=0; #tracks the genotyping status of sons. Gets reset for each new variant site
 			$num_daughters=0;
 			$num_het_daughters=0;
 			$num_sons=0;
-			$num_het_sons=0;
-			for ($x = 1 ; $x <= $number_of_samples; $x++ ){ # cycle through each sample
-				if($sexes[$x-1] != 2){ # only consider samples that are included
+			$num_het_sons=0; #these are all variables that i will start by setting to zero
+			for ($x = 1 ; $x <= $number_of_samples; $x++ ){ # cycle through each sample, starting with sample 1. The sample number is "x", the "xth sample". "$x++" means that x increases by 1 each iteration of the loop. The loop continues so long as x is less than or equal to the number of samples, ensuring that all samples are genotyped. 
+				if($sexes[$x-1] != 2){ # only consider samples that are included ("2" in the sexes string means to exclude a sample)
 					@pat = split(":",$columns[$x+8]); # this is the whole genotype and other info from the vcf file
 					@pat1 = split(/[\|\/]/,$pat[0]); # this is only the genotype
 					# check if the daughters are homozygous or missing
