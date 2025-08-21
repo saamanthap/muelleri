@@ -165,8 +165,8 @@ while ( my $line = <DATAINPUT>) {
 				#outfile 1 contains the positions where all the sons are homozygous and at leas five daughters are heterozygous. This is closest to the conditions I want for muelleri, although I probably want ALL daughters with genotypes to be heterozygous and all sons with genotypes to be homozygous.
 			}
 			
-		} # end else
-} # end while
+		} # end else (this is the else loop that continued as long as the script could read NON-header line)
+} # end while (this is the while loop that continued so long as there were lines of the file to read)
 
 ```
 close DATAINPUT;
