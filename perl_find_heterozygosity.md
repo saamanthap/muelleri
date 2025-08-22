@@ -311,36 +311,36 @@ while ( my $line = <DATAINPUT>) { #this loop is what actually processes the file
 		}	
 		# OK I should have all the bases loaded for non-missing genotypes for each male and each female
 		
-		@unique_male_nucleotides = uniq @males; 
-		@unique_female_nucleotides = uniq @females; 
+		@unique_male_nucleotides = uniq @males; #extract only the unique elements of the males array, meaning only look at the heterozygous positions. Recall that this array contains alleles only (just letters). After applying "uniq", heterozygous positions should have at least 2 items in the array (because there were two different alleles)
+		@unique_female_nucleotides = uniq @females; #extract only the unique elements of the females array
 		#print @females," ",@males,"\n"; 
 		#print $#unique_male_nucleotides," ",$#unique_female_nucleotides,"\n";
 		# looks fine
-		if(($#unique_male_nucleotides != -1)&&($#unique_female_nucleotides != -1)){
+		if(($#unique_male_nucleotides != -1)&&($#unique_female_nucleotides != -1)){ #execute this block if the index number of the last element in the array is not -1 (which would only be true if the array were empty)
 			# we can compare homoz and het genotypes because both sexes have data
-			if(($#unique_male_nucleotides == 0)&&($#unique_female_nucleotides > 0)){
+			if(($#unique_male_nucleotides == 0)&&($#unique_female_nucleotides > 0)){ #if the number of the last index in @males is 0, then all males are homozyous at his position. if the number of the last index in @females is greater than 0, then at least some females are heretozygous
 				# all males are homoz but at least some females are hets or homoz for another SNP
 				# check if the proportion of divergent positions in females is high enough
-				$diverged=0;
-				for ($x = 0 ; $x <= $#females ; $x++ ) {
-					if($females[$x] ne $males[0]){
-						$diverged+=1;
+				$diverged=0; #set diverged to 0 initially
+				for ($x = 0 ; $x <= $#females ; $x++ ) { #x equals zero, x is less than or equal to the last index number of the females array, increment x by one each iteration
+					if($females[$x] ne $males[0]){ #if the current female does not equal the first male (we can just use the first male, because in this case, we already know all males to be homozygous)
+						$diverged+=1; #add 1 to the value of diverged. this effectively counts how many times a given divergent allele is found in the population of females.
 					}
 				}
-				if($diverged > $proportion*($#females+1)){	
+				if($diverged > $proportion*($#females+1)){	#if the number of times an allele is divergent in the female population is greater than the proportion of divergence threshhold times the number of females, then the information for the position gets printed to the outfile: chrom 	position	"sex specific snp"	number of females	number of males
 					print OUTFILE1 $temp[0],"\t",$temp[1],"\tSex_specific_SNP\t1\t",($#females+1)/2,"\t",($#males+1)/2,"\n"; 
 					# Sex_specific_SNP
 					# Category of 1 means ZW or a female-specific SNP
 				}
 				# now check for the extreme case where all females are heterozygous and all males are homoz
 				# this is rare because we expect some genotypes in females to be undercalled, even in sex-linked regions
-				$diverged=0;
-				for ($x = 0 ; $x <= $#females ; $x=$x+2 ) {
-					if($females[$x] ne $females[$x+1]){
+				$diverged=0; #start diverged at 0
+				for ($x = 0 ; $x <= $#females ; $x=$x+2 ) { #the value of x is always in multiples of 2 so that you get both alleles for one individual
+					if($females[$x] ne $females[$x+1]){ #if any female is heterozygous, add 1 to the value of diverged
 						$diverged+=1;
 					}
 				}
-				if($diverged == ($#females+1)/2){	
+				if($diverged == ($#females+1)/2){	#if the diverged count is equal to the number of females, print sex-specific positions to the outfile
 					print OUTFILE1 $temp[0],"\t",$temp[1],"\tSex_specific_heterozygosity\t1\t",($#females+1)/2,"\t",($#males+1)/2,"\n"; 
 					# Sex_specific_heterozygosity
 					# 1 means all females are hets and all males are homoz
@@ -383,7 +383,7 @@ while ( my $line = <DATAINPUT>) { #this loop is what actually processes the file
 				# 1 means diverged
 			}
 		}
-		elsif(($#unique_male_nucleotides != -1)&&($#unique_female_nucleotides == -1)){
+		elsif(($#unique_male_nucleotides != -1)&&($#unique_female_nucleotides == -1)){ #male array is not empty, female array IS empty
 			# females have no data
 			# could be male-specific
 			if((($#males +1)/2) > $proportion*$number_of_male_individuals_genotyped){
@@ -392,7 +392,7 @@ while ( my $line = <DATAINPUT>) { #this loop is what actually processes the file
 				# -1 means male specific or male specific
 			}	
 		}
-		elsif(($#unique_male_nucleotides == -1)&&($#unique_female_nucleotides != -1)){
+		elsif(($#unique_male_nucleotides == -1)&&($#unique_female_nucleotides != -1)){ #male array is empty, female array is not empty
 			# males have no data
 			# could be female-specific
 			if((($#females +1)/2) > $proportion*$number_of_female_individuals_genotyped){
