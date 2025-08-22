@@ -173,7 +173,7 @@ close OUTFILE;
 close OUTFILE2;
 
 ```
-Another of Ben's scripts, which "screens for sex-specific hets". Here is what the tab-delimited file looks like: 
+Another of Ben's scripts, which "screens for sex-specific hets". Here is what the tab-delimited file looks like (for my data, even though the script is designed for Ben's data): 
 ```
 #CHROM  POS     REF     X_muelleri_tad31_S11_L001__trim_sorted.bam      X_muelleri_tad32_S12_L001__trim_sorted.bam  X_muelleri_tad33_S13_L001__trim_sorted.bam      X_muelleri_tad34_S14_L001__trim_sorted.bam  X_muelleri_tad35_S15_L001__trim_sorted.bam      X_muelleri_tad36_S16_L001__trim_sorted.bam          X_muelleri_tad37_S17_L001__trim_sorted.bam      X_muelleri_tad38_S18_L001__trim_sorted.bam          X_muelleri_tad39_S19_L001__trim_sorted.bam      X_muelleri_tad42_S20_L001__trim_sorted.bam
 Chr4L   24979   T       ./.     ./.     ./.     G/G     ./.     ./.     ./.     ./.     ./.     G/G
@@ -285,35 +285,35 @@ print "This includes ",$number_of_female_individuals_genotyped," female(s) and  
 
 while ( my $line = <DATAINPUT>) { #this loop is what actually processes the file line by line. The loop continues WHILE a line is successfully read from the file. The loop terminates when it runs out of new lines
 	chomp($line); #chomp removes trailing newline characters from a string to make sure it only contains the info i want
-	@temp=split /[\t\/]/,$line; #split the line according to tab-delimited fields and backslashes. Store the info in the temp string
+	@temp=split /[\t\/]/,$line; #split the line according to tab-delimited fields and backslashes. Store the info in the temp string. This creates ((# of individuals)x2 +3) number of fields. 
 	if($temp[0] ne '#CHROM'){ # "#CHROM" is part of the header, so this condition allows you to execute code only for the non-header lines. Specifically, this checks if the first column is not equal to #CHROM
-		if($#temp ne (($#sexes+1)*2)+2){ #this checks the number of items in temp. get the number of individuals from the sex string, 
+		if($#temp ne (($#sexes+1)*2)+2){ #this checks the the largest index number of temp to make sure the amount of sample columns matches the number of characters in the sex string. if not, print an error message
 			print "The number of individuals in the input line does not match the number of individuals genotyped ",
-			$temp[0],"\t",$temp[1],"\t",$#temp," ",(($#sexes+1)*2)+2,"\n";
+			$temp[0],"\t",$temp[1],"\t",$#temp," ",(($#sexes+1)*2)+2,"\n"; 
 		}
 
 		# parse the bases in all genotypes in each sex
 		@males=();
 		@females=();
 		$counter=0;
-		for ($y = 3 ; $y <= $#temp; $y=$y+2 ) {
-			if(($temp[$y] ne ".")&&($temp[$y+1] ne ".")){
-				if($sexes[$counter] == 0){
-						push(@males, $temp[$y]);
-						push(@males, $temp[$y+1]);
+		for ($y = 3 ; $y <= $#temp; $y=$y+2 ) { #y=3 is true (which represents the ref genotype column), the current column number is less than or equal to the total column number, y=y+2 means move over two columns (second genotype in the first individual's genotype column) 
+			if(($temp[$y] ne ".")&&($temp[$y+1] ne ".")){ #if the first allele is not missing and the second allele is not missing
+				if($sexes[$counter] == 0){ #if counter variable is set to zero (male individual)
+						push(@males, $temp[$y]); #push adds elements to the end of an array. in this case, it adds the value of the first allele for the current individual
+						push(@males, $temp[$y+1]); #adds the value of the second allele for the current individual
 				}
-				elsif($sexes[$counter] == 1){
-					push(@females, $temp[$y]);
-					push(@females, $temp[$y+1]);
+				elsif($sexes[$counter] == 1){ #if the current individual is female
+					push(@females, $temp[$y]); #add the first allele to the females array
+					push(@females, $temp[$y+1]); #add the second allele
 				}	
 			}
-			$counter+=1;
+			$counter+=1; #increase the value of the counter variable by 1 (to indicate that you have finished loading all the non-missing genotypes into the @males and @females arrays)
 		}	
 		# OK I should have all the bases loaded for non-missing genotypes for each male and each female
 		
-		@unique_male_nucleotides = uniq @males;
-		@unique_female_nucleotides = uniq @females;
-		#print @females," ",@males,"\n";
+		@unique_male_nucleotides = uniq @males; 
+		@unique_female_nucleotides = uniq @females; 
+		#print @females," ",@males,"\n"; 
 		#print $#unique_male_nucleotides," ",$#unique_female_nucleotides,"\n";
 		# looks fine
 		if(($#unique_male_nucleotides != -1)&&($#unique_female_nucleotides != -1)){
