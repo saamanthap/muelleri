@@ -173,7 +173,15 @@ close OUTFILE;
 close OUTFILE2;
 
 ```
-Another of Ben's scripts, which "screens for sex-specific hets":
+Another of Ben's scripts, which "screens for sex-specific hets". Here is what the tab-delimited file looks like: 
+```
+#CHROM  POS     REF     X_muelleri_tad31_S11_L001__trim_sorted.bam      X_muelleri_tad32_S12_L001__trim_sorted.bam  X_muelleri_tad33_S13_L001__trim_sorted.bam      X_muelleri_tad34_S14_L001__trim_sorted.bam  X_muelleri_tad35_S15_L001__trim_sorted.bam      X_muelleri_tad36_S16_L001__trim_sorted.bam          X_muelleri_tad37_S17_L001__trim_sorted.bam      X_muelleri_tad38_S18_L001__trim_sorted.bam          X_muelleri_tad39_S19_L001__trim_sorted.bam      X_muelleri_tad42_S20_L001__trim_sorted.bam
+Chr4L   24979   T       ./.     ./.     ./.     G/G     ./.     ./.     ./.     ./.     ./.     G/G
+Chr4L   40872   G       ./.     A/A     ./.     ./.     A/A     ./.     ./.     ./.     ./.     ./.
+Chr4L   40877   T       ./.     G/G     ./.     ./.     G/G     ./.     ./.     ./.     ./.     ./.
+
+```
+The script (annotated by me)
 ```
 
 #!/usr/bin/env perl
