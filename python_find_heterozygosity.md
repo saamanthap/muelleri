@@ -58,7 +58,83 @@ except IOError as e:
   print(f"Error: Could not open VCF file {vcf_file}. {e}", file=sys.stderr)
   sys.exit(1)
 
-#make sure the the number of individuals 
+#make sure the the number of samples matches the length of the sex string. recall that "sexes" is the sex string formatted as a list of integers. vcf_in.header.samples effectively represents the samples within the header of the "vcf_in" file
+if len(sexes) != len(list(vcf_in.header.samples)):
+  print("Error: Number of individuals in sex string does not match VCF samples.", file=sys.stderr)
+  sys.exit(1)
+
+#build indices that contain the male and female samples. basically, i'm building new lists of pairs (index, value) 
+male_indices = [i for i, s in enumerate(sexes) if s == 0]
+female_indices = [i for i, s in enumerate(sexes) if s ==1]
+
+#count the males and females
+num_males = len(male_indices)
+num_females = len(female_indices)
+print(f"This includes {num_females} female(s) and {num_males} male(s).")
+
+#set up the output file. the 'w' in open() is write mode, meaning that the file is created if it doesn't exist, and if it does exist, it is overwritten
+try:
+  outfile = open(output_file, 'w')
+  outfile.write("CHR\tPS\tTYPE\tCATEGORY\tn_FEM\tn_MALE\n")
+except IOError as e:
+  print(f"Error: Could not open output file {output_file} for writing. {e}", file=sys.stderr)
+  sys.exit(1)
+
+#now is the time to apply the main logic of the script! i will iterate through the vcf file
+#"record" is a type of object specific to vcf files that has special properties for the chromosome, position and genotype information for every sample
+#i will also initialize empty lists male_alleles and female_alleles. these lists get reset with each position
+for record in vcf_in:
+  male_alleles = []
+  female_alleles = []
+
+for sample_index in male_indices:
+  sample_name = vcf_in.header.samples[sample_index] #use the index to get the name of a particular sample from the header
+  alleles = record.samples[sample_name].alleles #use the sample name to get the allele for a particular sample at a particular position
+  if None not in alleles:
+    male_alleles.extend(alleles) #in the pysam library, missing genotypes are represented by "None". if the genotype is not missing, add the allele to the male_alleles list. The list will collect all the alleles for all the males for a given position, and will reset for the next position.
+
+#do the same for female alleles
+for sample_index in female_indices:
+  sample_name = vcf_in.header.samples[sample_index]
+  alleles = record.samples[sample_name].alleles
+  if None not in alleles:
+    female_alleles.extend(alleles)
+
+#each genotyped individual has two alleles, so to get the number of genotyped individuals, divide the number of alleles by 2
+#basically, this block is going to check if the number of genotyped males and females is 0 (meaning all individuals have missing genotypes). if true, the rest of the code is skipped for the position, since there is no point executing on empty lists
+num_males_genotyped = len(male_alleles) / 2
+num_females_genotyped = len(female_alleles) / 2
+if num_males_genotyped == 0 and num_females_genotyped == 0:
+  continue
+
+#this is the part where i use counter! this replaces the way ben used "uniq" in the original perl script
+#i'm going to create Counter objects that count the number of unique alleles that appear in the male_alleles and female_alleles lists
+male_allele_counts = Counter(male_alleles)
+female_allele_counts = Counter(female_alleles)
+
+is_male_hom = len(male_allele_counts) == 1 #only 1 unique allele was found, so all males are homozygous at this position
+is_male_het = len(male_allele_counts) > 1 #more than 1 unique allele was found, so at least one male is heterozygous
+is_female_hom = len(female_allele_counts) == 1
+is_female_het = len(female_allele_counts) > 1
+
+#Now i want to check various scenarios that i am interested in, and save the positions where these scenarios occur
+#first scenario: males are homozygous and females are heterozygous (what i would likely expect for a muelleri sex-determining region)
+if is_male_hom and is_female_het and num_males_genotyped > 0: #making sure that males are homozygous, females are heterozygous, and at least 1 male was genotyped. if so, check proportion of divergence
+
+#here, i can get the single allele carried by the homozygous males. i will simply take the first item stored in the Counter object male_allele_counts's keys
+male_base = list(male_allele_counts.keys())[0]
+#count how many female alleles are different from the single male allele. use [male_base] to subset the female_allele_counts, essentially counting how many times the male allele appears and subtracting from the total number of female alleles
+diverged_alleles_count = len(female_alleles) - female_allele_counts[male_base]
+
+#i specify the proportion of divergence in a commandline argument when running the script. here, i check if the number of diverged alleles is greater than the proportion times the number of female alleles. if proportion were 0.5, this would check that at least half of the female alleles diverge from the male allele (meaning that all females are heterozygous!) <- not sure if this is a good explanation?
+if diverged_alleles_count > proportion * len(female_alleles):
+  outfile.write(
+    f"{record.chrom}\t{record.pos}\tSex_specific_SNP\t1\t"
+    f"{num_females_genotyped}\t{num_males_genotyped}\n"
+)
+
+
+
 
 
 
