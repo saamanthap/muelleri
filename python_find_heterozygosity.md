@@ -118,7 +118,7 @@ is_female_hom = len(female_allele_counts) == 1
 is_female_het = len(female_allele_counts) > 1
 
 #Now i want to check various scenarios that i am interested in, and save the positions where these scenarios occur
-#first scenario: males are homozygous and females are heterozygous (what i would likely expect for a muelleri sex-determining region)
+#first scenario: males are homozygous and females are heterozygous (what i would likely expect for a muelleri sex-determining region) called Category 1
 if is_male_hom and is_female_het and num_males_genotyped > 0: #making sure that males are homozygous, females are heterozygous, and at least 1 male was genotyped. if so, check proportion of divergence
 
 #here, i can get the single allele carried by the homozygous males. i will simply take the first item stored in the Counter object male_allele_counts's keys
@@ -132,6 +132,66 @@ if diverged_alleles_count > proportion * len(female_alleles):
     f"{record.chrom}\t{record.pos}\tSex_specific_SNP\t1\t"
     f"{num_females_genotyped}\t{num_males_genotyped}\n"
 )
+
+#check for the extreme case where all females are heterozygous
+#loop through female_alleles in increments of two and add 1 for each pair of alleles IF they are different (meaning the individual is heterozygous)
+num_het_females = sum(1 for i in range(0, len(female_alleles), 2)
+                        if female_alleles[i] != female_alleles[i+1])
+if num_het_females == num_females_genotyped: #checks if ALL genotyped females are het and then writes the position to the outfile
+  outfile.write(
+    f"{record.chrom}\t{record.pos}\tSex_specific_heterozygosity\t1\t"
+    f"{num_females_genotyped}\t{num_males_genotyped}\n"
+  )
+
+#Category -1 - female homozgosity and male heterozygosity
+elif is_female_hom and is_male_het and num_females_genotyped > 0:
+  female_base = list(female_allele_counts.keys())[0]
+  diverged_alleles_count = len(male_alleles) - male_allele_counts[female_base]
+
+  if diverged_alleles_count > proportion * len(male_alleles):
+    outfile.write(
+      f"{record.chrom}\t{record.pos}\tSex_specific_SNP\t-1\t"
+      f"{num_females_genotyped}\t{num_males_genotyped}\n"
+    )
+
+#extreme case - all males are heterozygous
+num_het_males = sum(1 for i in range(0, len(male_alleles), 2)
+                      if male_alleles[i] != male_alleles[i+1])
+if num_het_males == num_males_genotyped:
+  outfile.write(
+    f"{record.chrom}\t{record.pos}\tSex_specific_SNP\t-1\t"
+    f"{num_females_genotyped}\t{num_males_genotyped}\n"
+  )
+
+#category 1 - fixed divergence (meaning both males and females are homozygous, but for different alleles)
+elif is_male_hom and is_female_hom and male_allele_counts != female_allele_counts:
+  outfile.write(
+    f"{record.chrom}\t{record.pos}\tFixed_divergence\t1\t"
+    f"{num_females_genotyped}\t{num_males_genotyped}\n"
+  )
+
+#category 1 - female specific nucleotide (meaning males have no data!)
+elif num_males_genotyped == 0 and num_females_genotyped > 0:
+  if num_females_genotyped > proportion * num_females:
+    outfile.write(
+      f"{record.chrom}\t{record.pos}\tSex_specific_nucleotide\t1\t"
+      f"{num_females_genotyped}\t{num_males_genotyped}\n"
+    )
+
+#category -1 - male specific nucleotide (meaning females have no data)
+elif num_females_genotyped == 0 and num_males_genotyped > 0:
+  if num_males_genotyped > proportion * num_males:
+    outfile.write(
+      f"{record.chrom}\t{record.pos}\tSex_specific_nucleotide\t-1\t"
+      f"{num_females_genotyped}\t{num_males_genotyped}\n"
+    )
+
+#now close the files
+outfile.close()
+vcf_in.close()
+
+if __name__ == "__main__":
+  main()
 
 
 
