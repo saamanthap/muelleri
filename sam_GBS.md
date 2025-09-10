@@ -1,5 +1,5 @@
 # Sam_GBS.md
-### Modified versions of Ben's scripts from [2020_GBS](https://github.com/evansbenj/2020_GBS.md) which can be run in parallel on Brian's machine.
+### Modified versions of Ben's scripts from [2020_GBS](https://github.com/evansbenj/2020_GBS.md), some of which have been modified for Brian's machines, and others that work on Nibi.
 
 ## Trimmomatic
 Trimmomatic is used to trim adapters and primers that remain on reads from library prep and sequencing. Make sure that you have an adaptor file in fasta format that contains the sequences of all the adaptors and primers you want to trim.  
@@ -298,4 +298,45 @@ commandline+=" -L ${chrom} --tmp-dir $temp --batch-size 50 --genomicsdb-workspac
 ${commandline}
 
 ```
+Now GenotypeGVCFs. Since I used GenomicsDBImport for the last step, I must use the -V gendb:// flag. Also note that you MUST use the same version of gatk for this and the previous step.
+```
+#!/bin/sh
+#SBATCH --job-name=GenotypeGVCFs
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=12:00:00
+#SBATCH --mem=23gb
+#SBATCH --output=GenotypeGVCFs.%J.out
+#SBATCH --error=GenotypeGVCFs.%J.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+
+# This script will read in the *.g.vcf file names in a directory, and
+# make and execute the GATK command "GenotypeGVCFs" on these files.
+
+# execute like this:
+# sbatch 2021_GenotypeGVCFs_DB.sh
+
+ref=/home/samp/projects/rrg-ben/for_Sam/2021_XL_v10_refgenome/XENLA_10.1_genome.fa
+# in this case, db will be ../DBI_combineGVCF_Chr4L (if i run from the genotype_gvcf directory)
+
+module load StdEnv/2023 gatk/4.6.1.0
+
+workspace=/project/6019307/for_Sam/muel/DBI_combineGVCF_Chr4L
+db=$(basename ${workspace})
+
+commandline="gatk --java-options -Xmx18G GenotypeGVCFs -R ${ref} -V gendb://${workspace} -O ${db}_out.vcf"
+
+${commandline}
+```
+I skipped VariantFiltration and SelectVariants... this means that my data is noisier. In the future, it is worth using these to clean up less reliable variants. (See Ben's GBS page for more info.)  
+I used vcftools to output a new vcf file that contains SNPs only. You can run this from the head, and should only take a few seconds:
+```
+vcftools --vcf input_file.vcf --remove-indels --recode --recode-INFO-all --out SNPs_only
+```
+After these steps are done, use my [python script](https://github.com/saamanthap/muelleri/blob/main/python_find_heterozygosity.md) for flagging heterozygous or sex-specific sites. 
+
 
