@@ -164,4 +164,138 @@ java -Xmx24G -jar $gatk HaplotypeCaller \
         -O $ouput \
         -ERC GVCF
 ```
+I also have a version of haplotypeCaller for use on nibi (I reccomend using this instead of working on Brian's machine, on which big jobs occaisionally fail). This script is called **
+```
+#!/bin/sh
+#SBATCH --job-name=HaplotypeCaller
+#SBATCH --array=0
+#SBATCH --cpus-per-task=4
+#SBATCH --time=48:00:00
+#SBATCH --mem=100GB
+#SBATCH --output=HaplotypeCaller.%A.%a.out
+#SBATCH --error=HaplotypeCaller.%A.%a.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+
+# This script will read in the *trim_rg.bam file names in a directory, and make and execute the GATK command "HaplotypeCaller" on these files.
+# Run like this: sbatch path/to/wip_haplo *file_ending
+
+module load StdEnv/2023 gatk/4.6.1.0
+
+ref=/home/samp/projects/rrg-ben/for_Sam/2021_XL_v10_refgenome/XENLA_10.1_genome.fa
+in=/home/samp/projects/rrg-ben/for_Sam/muel/muel_bam/${1}
+outdir=/home/samp/projects/rrg-ben/for_Sam/muel/new_muel_sorted
+
+declare -a file=(${in})
+
+current=${file[${SLURM_ARRAY_TASK_ID}]}
+base=$(basename ${current} .bam)
+
+mkdir -p ${outdir}
+
+gatk --java-options -Xmx24G HaplotypeCaller -I ${current} -R ${ref} -O ${outdir}/${base}.g.vcf -ERC GVCF --native-pair-hmm-threads 4
+
+```
+Combine GVCFs. My script is called **wip_combineGVCF**. You'll have to pick an interval to combine the GVCFs across (in this case I chose Chr4L). If you want to combine GVCFs for all chromosomes, use the array version of this script, which is below.
+```
+#!/bin/sh
+#SBATCH --job-name=GenomicsDBImport
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=18
+#SBATCH --time=60:00:00
+#SBATCH --mem=100gb
+#SBATCH --output=GenomicsDBImport.%J.out
+#SBATCH --error=GenomicsDBImport.%J.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+
+# This script will read in the *.g.vcf file names in a directory, and
+# make and execute the GATK command "GenotypeGVCFs" on these files.
+
+# execute like this:
+# sbatch 2021_GenomicsDBImport.sh /home/ben/projects/rrg-ben/ben/2020_XL_v9.2_refgenome/XENLA_9.2_genome.fa /home/ben/projects/rrg-ben/ben/2020_GBS_muel_fish_allo_cliv_laev/raw_data/cutaddapted_by_species_across_three_plates/clivii/vcf/ chr1L temp_path_and_dir db_path_and_dir_prefix
+
+# argument 1 is the ref genome
+# argument 2 is the .g.vcf files
+# argument 3 is the chromosome
+# argument 4 is the path and dir for temp files
+# argument 5 is the path to the database and the chromosome
+
+# (sam's changes) run like this: sbatch wip_combineGVCF
+# this command outputs a GenomicsDB workspace
+
+# pretty sure i don't need to load nixpkgs, since Graham already has gatk
+module load StdEnv/2023 gatk/4.6.1.0
+
+ref=/home/samp/projects/rrg-ben/for_Sam/2021_XL_v10_refgenome/XENLA_10.1_genome.fa
+vcfdir=/home/samp/projects/rrg-ben/for_Sam/muel/new_muel_sorted/
+chrom=Chr4L
+workspace=/home/samp/projects/rrg-ben/for_Sam/muel/DBI_combineGVCF
+temp=/home/samp/projects/rrg-ben/for_Sam/muel/DBI_combineGVCF_temp/
+
+
+commandline="gatk --java-options -Xmx20G GenomicsDBImport -R $ref"
+for file in ${vcfdir}*rg.g.vcf
+do
+    commandline+=" -V ${file}"
+done
+
+commandline+=" -L ${chrom} --tmp-dir $temp --batch-size 50 --genomicsdb-workspace-path ${workspace}/ --max-num-intervals-to-import-in-parallel ${SLURM_CPUS_PER_TASK} --genomicsdb-shared-posixfs-optimizations"
+
+${commandline}
+
+```
+CombineGVCFs for all chromosomes (submit each chromosome separately, in an array). Here, I hard-coded in the names of all the chromosomes. This script is called **wip_combineGVCF_array**
+```
+#!/bin/sh
+#SBATCH --job-name=GenomicsDBImport
+#SBATCH --array=0-17
+#SBATCH --cpus-per-task=10
+#SBATCH --time=6:00:00
+#SBATCH --mem=24gb
+#SBATCH --output=GenomicsDBImport.%J.%j.out
+#SBATCH --error=GenomicsDBImport.%J.%j.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+
+# This script will read in the *.g.vcf file names in a directory, and
+# make and execute the GATK command "GenotypeGVCFs" on these files.
+
+# (sam's changes) run like this: sbatch wip_combineGVCF
+# this command outputs a GenomicsDB workspace
+
+# pretty sure i don't need to load nixpkgs, since Graham already has gatk
+module load StdEnv/2023 gatk/4.6.1.0
+
+# i'm making this script into an array to run each chromosome as a separate job
+
+declare -a chroms=("Chr1L" "Chr1S" "Chr2L" "Chr2S" "Chr3L" "Chr3S" "Chr4L" "Chr4S" "Chr5L" "Chr5S" "Chr6L" "Chr6S" "Chr7L" "Chr7S" "Chr8L" "Chr8S" "Chr9_10L" "Chr9_10S")
+
+ref=/home/samp/projects/rrg-ben/for_Sam/2021_XL_v10_refgenome/XENLA_10.1_genome.fa
+vcfdir=/home/samp/projects/rrg-ben/for_Sam/muel/new_muel_sorted/
+chrom=${chroms[${SLURM_ARRAY_TASK_ID}]} # add coordinates of sex-specific region
+workspace=/home/samp/projects/rrg-ben/for_Sam/muel/DBI_combineGVCF_all_chroms
+temp=/home/samp/projects/rrg-ben/for_Sam/muel/DBI_combineGVCF_all_chroms/DBI_combineGVCF_temp/
+
+commandline="gatk --java-options -Xmx20G GenomicsDBImport -R $ref"
+for file in ${vcfdir}*rg.g.vcf
+do
+    commandline+=" -V ${file}"
+done
+
+commandline+=" -L ${chrom} --tmp-dir $temp --batch-size 50 --genomicsdb-workspace-path ${workspace}_${chrom}/ --reader-threads ${SLURM_CPUS_PER_TASK}"
+
+${commandline}
+
+```
 
