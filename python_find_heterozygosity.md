@@ -1,4 +1,4 @@
-This script is called **find_het_positions.py**. It iterates through records in a vcf file and flags positions belonging to 2 categories. (How to produce this vcf file [here]())
+This script is called **find_het_positions.py**. It iterates through records in a vcf file and flags positions belonging to 2 categories. (How to produce this vcf file [here](https://github.com/saamanthap/muelleri/blob/main/sam_GBS.md))
 
 **Category 1** has four types of positions:
 - Female-specific SNP (only females and no males have this SNP) 
