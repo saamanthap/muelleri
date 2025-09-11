@@ -235,7 +235,8 @@ mkdir -p ${outdir}
 gatk --java-options -Xmx24G HaplotypeCaller -I ${current} -R ${ref} -O ${outdir}/${base}.g.vcf -ERC GVCF --native-pair-hmm-threads 4
 
 ```
-Combine GVCFs. My script is called **wip_combineGVCF**. You'll have to pick an interval to combine the GVCFs across (in this case I chose Chr4L). If you want to combine GVCFs for all chromosomes, use the array version of this script, which is below.
+## Combine GVCFs 
+My script is called **wip_combineGVCF**. You'll have to pick an interval to combine the GVCFs across (in this case I chose Chr4L). If you want to combine GVCFs for all chromosomes, use the array version of this script, which is below.
 ```
 #!/bin/sh
 #SBATCH --job-name=GenomicsDBImport
@@ -334,7 +335,8 @@ commandline+=" -L ${chrom} --tmp-dir $temp --batch-size 50 --genomicsdb-workspac
 ${commandline}
 
 ```
-Now GenotypeGVCFs. Since I used GenomicsDBImport for the last step, I must use the -V gendb:// flag. Also note that you MUST use the same version of gatk for this and the previous step.
+## GenotypeGVCFs
+Since I used GenomicsDBImport for the last step, I must use the -V gendb:// flag. Also note that you MUST use the same version of gatk for this and the previous step.
 ```
 #!/bin/sh
 #SBATCH --job-name=GenotypeGVCFs
@@ -369,6 +371,8 @@ commandline="gatk --java-options -Xmx18G GenotypeGVCFs -R ${ref} -V gendb://${wo
 ${commandline}
 ```
 I skipped VariantFiltration and SelectVariants... this means that my data is noisier. In the future, it is worth using these to clean up less reliable variants. (See Ben's GBS page for more info.)  
+```
+## vcftools
 I used vcftools to output a new vcf file that contains SNPs only. You can run this from the head, and should only take a few seconds:
 ```
 vcftools --vcf input_file.vcf --remove-indels --recode --recode-INFO-all --out SNPs_only
