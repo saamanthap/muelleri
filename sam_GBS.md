@@ -117,6 +117,42 @@ samtools index $sortedbam
 # limit to five (or whatever) jobs simultaneously
 # Run from the directory containing trimmed fastq files and give the correct relative path to for.Sam
 ```
+Version of bwa mem script made for nibi (called **wip_bwamem**)
+```
+#!/bin/bash
+#SBATCH --job-name=bwa_align
+#SBATCH --cpus-per-task=4
+#SBATCH --array 0-9
+#SBATCH --time=10:00:00
+#SBATCH --mem=32gb
+#SBATCH --output=bwa_align.%J.%j.out
+#SBATCH --error=bwa_align.%J.%j.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+#this script is used to map trimmed reads to a reference genome. the output SAM file is piped to samtools view, which reads the file. finally, the read SAM file is piped to samtools sort, which outputs the final sorted BAM file.
+
+#run like this: sbatch wip_bwamem path_to_ref path_to_fq_files
+
+module load StdEnv/2023 bwa/0.7.18 gcc/12.3 samtools/1.20
+
+ref=${1}
+fq_dir=${2}
+
+declare -a fwd=(${fq_dir}*trim_cut_polyA_R1.fq.gz)
+
+current_fwd=${fwd[${SLURM_ARRAY_TASK_ID}]}
+current_rev=${current_fwd/R1.fq.gz/R2.fq.gz}
+sorted=${current_fwd/trim_cut_polyA_R1.fq.gz/sorted.bam}
+
+if [[ -e ${current_fwd} && -e ${current_rev} ]]; then
+        bwa mem ${ref} ${current_fwd} ${current_rev} -t ${SLURM_CPUS_PER_TASK} | samtools view -Shu - | samtools sort - -o ${sorted}
+        samtools index ${sorted}
+fi
+
+
+```
 ## Add readgroups
 My script is called **readgroups.Sam**:
 ```
