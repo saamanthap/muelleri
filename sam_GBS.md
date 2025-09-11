@@ -371,7 +371,6 @@ commandline="gatk --java-options -Xmx18G GenotypeGVCFs -R ${ref} -V gendb://${wo
 ${commandline}
 ```
 I skipped VariantFiltration and SelectVariants... this means that my data is noisier. In the future, it is worth using these to clean up less reliable variants. (See Ben's GBS page for more info.)  
-```
 ## vcftools
 I used vcftools to output a new vcf file that contains SNPs only. You can run this from the head, and should only take a few seconds:
 ```
