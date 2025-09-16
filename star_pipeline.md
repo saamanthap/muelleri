@@ -19,6 +19,33 @@ I'm using the X. laevis reference genome 10.1 (which can be downloaded from Xenb
 ```
 /home/samp/projects/rrg-ben/for_Sam/2021_XL_v10_refgenome/XENLA_10.1_Xenbase.gtf
 ```
+## Building the genome index
+This needs to be done for new genomes. You can reuse the index for subsequent mapping jobs after building it once.   
+Set --sjdbOverhang to readlength-1
+```
+#!/bin/bash
+#SBATCH --job-name=STAR_index
+#SBATCH --cpus-per-task=10
+#SBATCH --time=5:00:00
+#SBATCH --mem=64gb
+#SBATCH --output=STAR_index.%A.out
+#SBATCH --error=STAR_index.%A.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+#paths are already hard-coded in. paste new paths to index other genomes
+#run like this: sbatch wip_STARindex
+
+module load StdEnv/2023 star/2.7.11b
+
+STAR --runThreadN 10 \
+--runMode genomeGenerate \
+--genomeDir /home/samp/projects/rrg-ben/for_Sam/Austin_genome_Xborealis/star_index \
+--genomeFastaFiles /home/samp/projects/rrg-ben/for_Sam/Austin_genome_Xborealis/Xbo.v1.fa \
+--sjdbGTFfile /home/samp/projects/rrg-ben/for_Sam/Austin_genome_Xborealis/Xbo.cds.gff \
+--sjdbOverhang 149 \
+```
 ## Star Mapping 
 Path to the script: 
 ```
