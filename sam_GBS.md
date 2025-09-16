@@ -151,7 +151,50 @@ if [[ -e ${current_fwd} && -e ${current_rev} ]]; then
         samtools index ${sorted}
 fi
 
+```
+If using RNAseq data (which I did for this project), map using STAR, which is splice-aware. (This script is called **wip_STAR**)
+```
+#!/bin/sh
+#SBATCH --job-name=STAR_map
+#SBATCH --array=0-9
+#SBATCH --cpus-per-task=10
+#SBATCH --time=5:00:00
+#SBATCH --mem=64gb
+#SBATCH --output=STAR_map.%A_%a.out
+#SBATCH --error=STAR_map.%A_%a.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
 
+set -euxo pipefail
+
+module load StdEnv/2023 star/2.7.11b
+
+# run like this: sbatch wip_STAR
+# run from the directory you want out and err files to save in
+
+dir=/home/samp/projects/rrg-ben/for_Sam/muel/muel_fq_fully_trimmed
+declare -a forward=(${dir}/*R1.fq.gz)
+fread=${forward[$SLURM_ARRAY_TASK_ID]}
+rread=${fread//_R1.fq.gz/_R2.fq.gz}
+outdir=/home/samp/projects/rrg-ben/for_Sam/muel/borealis_ref_genotyping/star_map/
+outpre=$(basename $fread L001__trim_cut_polyA_R1.fq.gz)
+ref=/home/samp/projects/rrg-ben/for_Sam/Austin_genome_Xborealis/Xbo.v1.fa
+gtf=/home/samp/projects/rrg-ben/for_Sam/Austin_genome_Xborealis/Xbo.cds.gff
+
+STAR --genomeDir ${ref} \
+--sjdbGTFfile ${gtf} \
+--runThreadN ${SLURM_CPUS_PER_TASK} \
+--readFilesIn ${fread} ${rread} \
+--outFileNamePrefix ${outdir}${outpre} \
+--outSAMtype BAM SortedByCoordinate \
+--outSAMunmapped Within \
+--outSAMattributes Standard \
+--alignEndsProtrude 10 ConcordantPair \
+--outFilterMatchNminOverLread 0.5 \
+        --readFilesCommand zcat
 ```
 ## Add readgroups
 My script is called **readgroups.Sam**:
