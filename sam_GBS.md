@@ -220,6 +220,36 @@ java -jar $picard AddOrReplaceReadGroups \
         RGPL=ILLUMINA \
         RGPU=$rgunit \
         RGSM=$rgsample
+
+```
+Version for nibi, called **wip_readgroups**:
+```
+#!/bin/sh
+#SBATCH --job-name=readgroups
+#SBATCH --array=0-9
+#SBATCH --cpus-per-task=1
+#SBATCH --time=10:00:00
+#SBATCH --mem=10gb
+#SBATCH --output=readgroups.%A.%a.out
+#SBATCH --error=readgroups.%A.%a.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+# run by passing an argument like this
+# sbatch ./2021_picard_add_read_groups.sh /home/ben/projects/rrg-ben/ben/2020_GBS_muel_fish_allo_cliv_laev/raw_data/cutaddapted_by_species_across_three_plates/clivii/
+
+#run like this: sbatch wip_readgroups bam_folder
+
+module load StdEnv/2023  picard/3.1.0
+
+dir=${1}
+declare -a in=(${dir}/*.bam)
+
+current_in=${in[${SLURM_ARRAY_TASK_ID}]}
+current_out=${current_in//_Aligned.sortedByCoord.out.bam/_rg.bam}
+
+java -jar $EBROOTPICARD/picard.jar AddOrReplaceReadGroups I=${current_in} O=${current_out} RGID=4 RGLB=$(basename $current_in) RGPL=ILLUMINA RGPU=$(basename $current_in) RGSM=$(basename $current_in)
 ```
 ## GATK HaplotypeCaller
 My script is called **haplo.Sam**:
