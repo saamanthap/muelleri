@@ -22,7 +22,7 @@ I'm using the popgenWindows.py script to estimate Fst for fixed windows on the c
 ```
 ython ~/genomics_general/popgenWindows.py -g DBI_combineGVCF_Chr1L_out.vcf.geno -o DBI_combineGVCF_Chr1L_out.vcf.geno.out --windType coordinate -f phased -w 1000000 -m 100 -p F -p M --popsFile pops_file.txt
 ```
-Note: the script seems to struggle to compute fst unless the -minSites flag (-m) is set very low...
+Note: the script seems to struggle to compute fst unless the -minSites flag (-m) is set very low... this is probably because there are quite a few windows with low numbers of sites...
 
 
 
