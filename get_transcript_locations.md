@@ -70,6 +70,6 @@ for $i in $(cat transcripts_with_locations); do
         if [ 114000000 =< $10 =< 138000000 || 114000000 =< $11 =< 138000000 ]; then
                 echo $i
         fi
-done
+done > output.txt
 ```
         
