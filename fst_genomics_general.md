@@ -26,7 +26,7 @@ Note: the script seems to struggle to compute fst unless the -minSites flag (-m)
 
 Here is a simple loop that allows me to process all the .geno files at once: 
 ```
-for i in $(ls *_out.vcf.geno) ; do python ~/genomics_general/popgenWindows.py -g DBI_combineGVCF_Chr1L_out.vcf.geno -o ${i}.out --windType coordinate -f phased -w 1000000 -m 100 -p F -p M --popsFile pops_file.text ; done 
+for i in $(ls *_out.vcf.geno) ; do python ~/genomics_general/popgenWindows.py -g DBI_combineGVCF_Chr1L_out.vcf.geno -o ${i}.out --windType coordinate -f phased -w 1000000 -m 100 -p F -p M --popsFile pops_file.txt ; done 
 
 ```
 
