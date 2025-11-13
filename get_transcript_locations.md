@@ -64,12 +64,20 @@ fi
 
 join -t $'\t' <(sort -k 1 ${1}) <(sort -k 1 ${2}) >> ${3}
 ```
-You might also want to filter for transcripts that fall within a specific region, for example the sex-linked region. This loop prints any lines where alignments either start or end within the sex-linked region.
+You might also want to filter for transcripts that fall within a specific region, for example the sex-linked region. Use awk to print any lines where alignments either start or end within the sex-linked region.
 ```
-for $i in $(cat transcripts_with_locations); do
-        if [ 114000000 =< $10 =< 138000000 || 114000000 =< $11 =< 138000000 ]; then
-                echo $i
-        fi
-done > output.txt
+#!/bin/bash
+
+awk '
+BEGIN {
+        START = ${3};
+        END = ${4};
+}
+{
+        if ( ( $10 >= START && $10 <= END || $11 >= START && $11 <= END ) )
+                print $0;
+        }
+} ${1} > ${2}
+ 
 ```
         
