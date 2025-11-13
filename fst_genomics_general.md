@@ -20,9 +20,17 @@ for i in $(ls *_out.vcf) ; do python ~/genomics_general/VCF_processing/parseVCF.
 ```
 I'm using the popgenWindows.py script to estimate Fst for fixed windows on the chromosome. This is the command I'm toying with right now:
 ```
-ython ~/genomics_general/popgenWindows.py -g DBI_combineGVCF_Chr1L_out.vcf.geno -o DBI_combineGVCF_Chr1L_out.vcf.geno.out --windType coordinate -f phased -w 1000000 -m 100 -p F -p M --popsFile pops_file.txt
+python ~/genomics_general/popgenWindows.py -g DBI_combineGVCF_Chr1L_out.vcf.geno -o DBI_combineGVCF_Chr1L_out.vcf.geno.out --windType coordinate -f phased -w 1000000 -m 100 -p F -p M --popsFile pops_file.txt
 ```
-Note: the script seems to struggle to compute fst unless the -minSites flag (-m) is set very low... this is probably because there are quite a few windows with low numbers of sites...
+Note: the script seems to struggle to compute fst unless the -minSites flag (-m) is set very low... this is probably because there are quite a few windows with low numbers of sites...  
+
+Here is a simple loop that allows me to process all the .geno files at once: 
+```
+for i in $(ls *_out.vcf.geno) ; do python ~/genomics_general/popgenWindows.py -g DBI_combineGVCF_Chr1L_out.vcf.geno -o ${i}.out --windType coordinate -f phased -w 1000000 -m 100 -p F -p M --popsFile pops_file.text ; done 
+
+```
+
+
 
 
 
