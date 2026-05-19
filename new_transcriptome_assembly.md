@@ -5,6 +5,7 @@ First step is to trim and then do QC. Before this, you might want to run fastqc 
 
 ```{bash}
 #!/bin/bash
+#SBATCH --job-name=bbduk
 #SBATCH --account=rrg-ben
 #SBATCH --array=0-9
 #SBATCH --cpus-per-task=8
@@ -25,7 +26,7 @@ R1=${forward[${SLURM_ARRAY_TASK_ID}]}
 
 adaptors=/home/samp/projects/rrg-ben/for_Sam/muel/ben_scripts/TruSeq2_and_3-PE-2.fa
 
-base=`basename ${R1}R1_001.fastq`
+base=$(basename ${R1} R1_001.fastq)
 
 bbduk.sh threads=8 \
         in1=${in}/${base}R1_001.fastq \
