@@ -27,17 +27,18 @@ adaptors=/home/samp/projects/rrg-ben/for_Sam/muel/ben_scripts/TruSeq2_and_3-PE-2
 
 base=`basename ${R1}R1_001.fastq`
 
-bbduk.sh threads=8
-in1=${in}/${base}R1_001.fastq \
-in2=${in}/${base}R2_001.fastq \
-out1=${out}/${base}R1_bbduk.fastq.gz \
-out2=${out}/${base}R2_bbduk.fastq.gz \
-red=${adaptors} \
-ktrim=r k=23 mink=11 hdist=1 tpe tbo qtrim=rl trimq=20 minlen=36 ftl=1 maq=20
+bbduk.sh threads=8 \
+        in1=${in}/${base}R1_001.fastq \
+        in2=${in}/${base}R2_001.fastq \
+        out1=${out}/${base}R1_bbduk.fastq.gz \
+        out2=${out}/${base}R2_bbduk.fastq.gz \
+        ref=${adaptors} \
+        ktrim=r k=23 mink=11 hdist=1 tpe tbo qtrim=rl trimq=20 minlen=36 ftl=1 maq=20
 
-fastqc/0.12.1 StdEnv/2023
+module load StdEnv/2023 fastqc/0.12.1
 
 fastqc ${out}/${base}R1_bbduk.fastq.gz ${out}/${base}R2_bbduk.fastq.gz
+
 
 ```
 This is my adaptor file:
