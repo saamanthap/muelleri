@@ -22,6 +22,25 @@ wget https://www.dfam.org/releases/current/families/FamDB/dfam39_full.12.h5.gz
 gunzip dfam39_full.12.h5.gz
 
 ```
+In order to make use of these databases, you need to extract your desired repeats as a fasta file. I'm replicating what was done in this paper, so I extracted anura (all frogs and toads) repeats only. I found this step to be time-consuming, so I submitted it to the queue as a job. The only contents of the directory specified after -i should be the root and other partitions you want to use.
+
+```
+#!/bin/bash
+#SBATCH --job-name=extract_fasta_famdb
+#SBATCH --cpus-per-task=1
+#SBATCH --time=4:00:00
+#SBATCH --mem=24G
+#SBATCH --output=extract_fasta_famdb.%J.out
+#SBATCH --error=extract_fasta_famdb.%J.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+module load StdEnv/2023 gcc/12.3 repeatmasker/4.2.1
+
+famdb.py -i /home/samp/projects/rrg-ben/for_Sam/reporter_project/famdb families -f fasta_name -d anura > ${1}
+```
+
 Then when you run the RepeatMasker command itself, you need to specify what database you want to use. (My input file here was a fasta file with entries for the 5'UTR and 5kb upstream region for ddx4 in tropicalis and laevis L and S subgenomes.)
 
 ```
