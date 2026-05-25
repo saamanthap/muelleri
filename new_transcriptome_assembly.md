@@ -81,3 +81,38 @@ AAGCAGTGGTATCAACGCAGAGTAC
 >Clontech_SMART_CDS_primer_II_A_polyT
 CAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 ```
+Now you can actually run the assembly. This step is super time and memory intensive. 
+```
+#!/bin/sh
+#SBATCH --job-name=trinity2
+#SBATCH --cpus-per-task=32
+#SBATCH --time=168:00:00
+#SBATCH --mem=250G
+#SBATCH --output=trinity2.%J.out
+#SBATCH --error=trinity2.%J.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+module load StdEnv/2020
+module load gcc/9.3.0 openmpi/4.0.3
+module load trinity/2.14.0 samtools/1.17 jellyfish/2.3.0
+module load salmon/1.4.0
+module load python/3
+module load scipy-stack/2023a
+
+Trinity --seqType fq \
+        --max_memory 200G \
+        --CPU ${SLURM_CPUS_PER_TASK} \
+        --full_cleanup \
+        --min_kmer_cov 2 \
+        --bflyCalculateCPU \
+        --jaccard_clip \
+        --left /home/samp/projects/rrg-ben/for_Sam/muel/bbduk_trimmed/X_muelleri_tad31_S11_L001_R1_bbduk.fastq.gz \
+        --right /home/samp/projects/rrg-ben/for_Sam/muel/bbduk_trimmed/X_muelleri_tad31_S11_L001_R2_bbduk.fastq.gz \
+        --output /home/samp/projects/rrg-ben/for_Sam/muel/new_improved_trinity2
+
+#the --jaccard_clip flag is expensive but can help with dense genomes, such as those with many paralogs
+#also, the order that you load modules is important... load compilers and such first... and don't forget to load python and scipy-stack so that you can use numpy!!!
+
+```
