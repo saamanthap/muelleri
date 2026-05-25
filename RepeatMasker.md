@@ -22,7 +22,8 @@ wget https://www.dfam.org/releases/current/families/FamDB/dfam39_full.12.h5.gz
 gunzip dfam39_full.12.h5.gz
 
 ```
-In order to make use of these databases, you need to extract your desired repeats as a fasta file. I'm replicating what was done in this paper, so I extracted anura (all frogs and toads) repeats only. I found this step to be time-consuming, so I submitted it to the queue as a job. The only contents of the directory specified after -i should be the root and other partitions you want to use.
+In order to make use of these databases, you need to extract your desired repeats as a fasta file. I'm replicating what was done in a paper, so I extracted anura (all frogs and toads) repeats only. I found this step to be time-consuming when running on the login node, so I submitted it to the queue as a job. The only contents of the directory specified after -i should be the root and other partitions you want to use.  
+The paper: Bredeson, J.V., Mudd, A.B., Medina-Ruiz, S. et al. Conserved chromatin and repetitive patterns reveal slow genome evolution in frogs. Nat Commun 15, 579 (2024). https://doi.org/10.1038/s41467-023-43012-9
 
 ```
 #!/bin/bash
