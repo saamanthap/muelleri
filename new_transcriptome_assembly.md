@@ -120,3 +120,11 @@ When my assembly finished running, I had ~110000 unique transcripts. You can als
 ```
 cut -f 1 trinity_tad31.fasta.gene_trans_map | sort | uniq | wc -l
 ```
+Next, I want to assemble a transcriptome for a male individual. Once I have this assembly, I can use reciprocal best blast hits to collapse the transcriptomes together in order to find sex-shared and sex-specific transcripts. In order to assemble the male transcriptome, just choose the male sample with the most reads, and run the assembly script from above. For reciprocal best blast hits: 
+```
+Nothing here yet...
+```
+Now that I have a single transcriptome with female-specific transcripts, male-specific transcripts and sex-shared transcripts, I want to run kallisto to quantify reads. Since I have a much smaller transcriptome, I should have much more statistical power: 
+```
+kallisto script will be here soon
+```
