@@ -116,3 +116,7 @@ Trinity --seqType fq \
 #also, the order that you load modules is important... load compilers and such first... and don't forget to load python and scipy-stack so that you can use numpy!!!
 
 ```
+When my assembly finished running, I had ~110000 unique transcripts. You can also check the gene_trans_map file to find out how many genes Trinity thinks you have (Trinity assembles isoforms independently for each gene). I had ~80000 genes. Keep in mind Trinity's identification of unique genes and isoforms is probably not very accurate. 80000 feels like a high estimate for the number of genes in X. muelleri: 
+```
+cut -f 1 trinity_tad31.fasta.gene_trans_map | sort | uniq | wc -l
+```
