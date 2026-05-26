@@ -122,7 +122,24 @@ cut -f 1 trinity_tad31.fasta.gene_trans_map | sort | uniq | wc -l
 ```
 Later, I can use the .gene_trans_map file as a tx2gene file with tximport in order to collapse isoforms to transcripts.   
 
-Next, I want to assemble a transcriptome for a male individual. Once I have this assembly, I can use reciprocal best blast hits to collapse the transcriptomes together in order to find sex-shared and sex-specific transcripts. In order to assemble the male transcriptome, just choose the male sample with the most reads, and run the assembly script from above. For reciprocal best blast hits: 
+Next, I want to assemble a transcriptome for a male individual. Once I have this assembly, I can use reciprocal best blast hits to collapse the transcriptomes together in order to find sex-shared and sex-specific transcripts. In order to assemble the male transcriptome, just choose the male sample with the most reads, and run the assembly script from above.  
+   
+Before doing BLAST reciprocal best hits, I filtered out just the longest isoform for each transcript: 
+```
+#!/bin/sh
+#SBATCH --job-name=get_longest_transcript
+#SBATCH --cpus-per-task=1
+#SBATCH --time=2:00:00
+#SBATCH --mem=100G
+#SBATCH --output=get_longest_transcript.%J.out
+#SBATCH --error=get_longest_transcript.%J.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+/home/samp/projects/rrg-ben/for_Sam/trinity_ben/trinityrnaseq-v2.15.2/util/misc/get_longest_isoform_seq_per_trinity_gene.pl /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/trinity_tad31.fasta > /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/trinity_tad31_longest_isoform.fasta
+```
+Now the reciprocal best hits:
 ```
 Nothing here yet...
 ```
