@@ -139,9 +139,11 @@ Before doing BLAST reciprocal best hits, I filtered out just the longest isoform
 
 /home/samp/projects/rrg-ben/for_Sam/trinity_ben/trinityrnaseq-v2.15.2/util/misc/get_longest_isoform_seq_per_trinity_gene.pl /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/trinity_tad31.fasta > /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/trinity_tad31_longest_isoform.fasta
 ```
-Now the reciprocal best hits:
+Now the reciprocal best hits. First make a blastable database for each transcriptome: 
 ```
-Nothing here yet...
+makeblastdb -in trinity_tad31_longest_isoform.fasta -dbtype nucl -out trinity_tad31_longest_is
+oform_blastable
+
 ```
 Now that I have a single transcriptome with female-specific transcripts, male-specific transcripts and sex-shared transcripts, I want to run kallisto to quantify reads. Since I have a much smaller transcriptome, I should have much more statistical power: 
 ```
