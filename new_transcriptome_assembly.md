@@ -81,7 +81,7 @@ AAGCAGTGGTATCAACGCAGAGTAC
 >Clontech_SMART_CDS_primer_II_A_polyT
 CAGTGGTATCAACGCAGAGTACTTTTTTTTTTTTTTTTTTTTTTTTTTTT
 ```
-Now you can actually run the assembly. This step is super time and memory intensive. 
+Now you can actually run the assembly. This step is super time and memory intensive. (Edit: for me, this only took about 6.5 hours.)
 ```
 #!/bin/sh
 #SBATCH --job-name=trinity2
@@ -121,6 +121,29 @@ When my assembly finished running, I had ~110000 unique transcripts. You can als
 cut -f 1 trinity_tad31.fasta.gene_trans_map | sort | uniq | wc -l
 ```
 Later, I can use the .gene_trans_map file as a tx2gene file with tximport in order to collapse isoforms to transcripts.   
+
+It's important to run some kind of QC on the assembly to see how well it was assembled. Trinity offers a script for the ExN50 metric, which is a modification of the N50 metric. From a review by Raghavan et al: "The N50 is a simple metric which describes the sequence length at which half the nucleotides in the genome assembly are in sequences equal in or longer than this length [76]. The goal would then be to maximize the N50 value as this would indicate complete assembly of all genomic elements This is inappropriate for transcriptome assemblies as the objective is recovery of many (relatively) short full-length sequences, and not the construction of a few very long contigs ... . The ExN50 metric is a modification to the traditional N50 making it suitable for assessing transcriptome assemblies. Here, the N50 value is calculated only for the top X% of the cumulative expression levels. The length reported as corresponding to ExN50 is a ‘gene’ length obtained as the expression-weighted sum of the corresponding isoform lengths." In order to compute ExN50, you first have to quantify transcript abundance. You can do this with a Trinity script:
+```
+#!/bin/sh
+#SBATCH --job-name=trinity_abundance_est
+#SBATCH --cpus-per-task=1
+#SBATCH --exclusive
+#SBATCH --time=48:00:00
+#SBATCH --output=trinity_abundance_est.%J.out
+#SBATCH --error=trinity_abundance_est.%J.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+/home/samp/projects/rrg-ben/for_Sam/trinity_ben/trinityrnaseq-v2.15.2/util/align_and_estimate_abundance.pl --transcripts /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/trinity_tad31.fasta --seqType fq --left /home/samp/projects/rrg-ben/for_Sam/muel/bbduk_trimmed/X_muelleri_tad31_S11_L001_R1_bbduk.fastq.gz --right /home/samp/projects/rrg-ben/for_Sam/muel/bbduk_trimmed/X_muelleri_tad31_S11_L001_R1_bbduk.fastq.gz --est_method kallisto --trinity_mode --prep_reference --output_dir /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/abundance_estimates
+
+```
+
+
+
+
+
+
 
 Next, I want to assemble a transcriptome for a male individual. Once I have this assembly, I can use reciprocal best blast hits to collapse the transcriptomes together in order to find sex-shared and sex-specific transcripts. In order to assemble the male transcriptome, just choose the male sample with the most reads, and run the assembly script from above.  
    
