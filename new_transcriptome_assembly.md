@@ -127,7 +127,6 @@ It's important to run some kind of QC on the assembly to see how well it was ass
 #!/bin/sh
 #SBATCH --job-name=trinity_abundance_est
 #SBATCH --cpus-per-task=1
-#SBATCH --exclusive
 #SBATCH --time=48:00:00
 #SBATCH --output=trinity_abundance_est.%J.out
 #SBATCH --error=trinity_abundance_est.%J.err
