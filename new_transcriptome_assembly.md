@@ -150,7 +150,12 @@ module load StdEnv/2020 gcc/9.3.0 samtools/1.17 kallisto/0.46.1
         --output_dir /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/abundance_estimates
 
 ```
-Once you have abundance estimates you 
+Once you have abundance estimates you can compute ExN50
+```
+
+
+
+```
 
 
 
