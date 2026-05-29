@@ -276,6 +276,13 @@ Ex      ExN50   num_genes
 98      1067    76815
 100     1026.19016255607 
 ```
+You can plot easily in R:
+```{r}
+exn50_transcript <- read.delim("tad31_ExN50.transcript.stats")
+exn50_gene <- read.delim("tad31_ExN50.gene.stats")
+plot(exn50_transcript$Ex, exn50_transcript$ExN50, type = "l")
+plot(exn50_gene$Ex, exn50_gene$ExN50, type = "l")
+```
 I want to figure out if this new assembly is better or worse than my previous assembly, which was assembled from all ten samples. It's possible that having more samples creates more "depth" which could help me assemble transcripts more completely. I already have an abundance file for this transcriptome (I had to estimate counts for all samples using kallisto and then combine the counts into a single file with a column for each sample).
 
 ```
