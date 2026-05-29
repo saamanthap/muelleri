@@ -150,15 +150,156 @@ module load StdEnv/2020 gcc/9.3.0 samtools/1.17 kallisto/0.46.1
         --output_dir /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/abundance_estimates
 
 ```
-Once you have abundance estimates you can compute ExN50
+Once you have abundance estimates you can compute ExN50. You can do this at a gene or transcript level (according to Trinity documentation, gene is more useful). Below I show the gene-level analysis, but you can compute ExN50 for individual transcripts by changing the word "gene" to transcript.
 ```
+#!/bin/sh
+#SBATCH --job-name=trinity_ExN50
+#SBATCH --cpus-per-task=1
+#SBATCH --time=2:00:00
+#SBATCH --mem=24gb
+#SBATCH --output=trinity_ExN50.%J.out
+#SBATCH --error=trinity_ExN50.%J.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
 
 
+/home/samp/projects/rrg-ben/for_Sam/trinity_ben/trinityrnaseq-v2.15.2/util/misc/contig_ExN50_statistic.pl \
+        /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/abundance_estimates/abundance.tsv \
+        /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad31/trinity_tad31.fasta \
+        gene | tee tad31_ExN50.gene.stats
+
+#you can do this at the transcript level or gene level... just use the command "gene" or "transcript" before the pipe to specify the target
 
 ```
+Here is an example of the gene-level output. A good way to interpret this is by plotting Ex against the ExN50 value. For a well-assembled transcriptome, N50 should peak around Ex90. Since mine crashes early, only the most highly expressed transcripts are assembled well, and then rest are highly fragmented:
+
+```
+Ex      ExN50   num_genes
+1       2471    12
+2       3947    30
+3       4626    55
+4       4671    85
+5       4640    120
+6       4740    158
+7       4600    201
+8       4462    246
+9       4450    295
+10      4218    345
+11      4160    398
+12      4045    453
+13      3971    511
+14      3916    572
+15      3883    635
+16      3826    701
+17      3757    769
+18      3731    840
+19      3654    914
+20      3617    989
+21      3595    1067
+22      3557    1149
+23      3522    1232
+24      3501    1318
+25      3462    1407
+26      3432    1499
+27      3390    1593
+28      3360    1691
+29      3338    1791
+30      3320    1895
+31      3291    2002
+32      3244    2112
+33      3198    2226
+34      3174    2343
+35      3133    2464
+36      3106    2589
+37      3087    2719
+38      3064    2853
+39      3047    2990
+40      3026    3133
+41      3006    3280
+42      2980    3434
+43      2947    3593
+44      2924    3758
+45      2892    3929
+46      2863    4107
+47      2835    4291
+48      2801    4483
+49      2779    4683
+50      2751    4891
+51      2731    5108
+52      2710    5335
+53      2687    5572
+54      2672    5821
+55      2652    6081
+56      2636    6354
+57      2622    6641
+58      2610    6942
+59      2596    7260
+60      2584    7595
+61      2568    7949
+62      2546    8324
+63      2509    8720
+64      2468    9138
+65      2427    9584
+66      2390    10059
+67      2350    10566
+68      2308    11107
+69      2268    11687
+70      2226    12312
+71      2187    12987
+72      2145    13712
+73      2102    14493
+74      2062    15337
+75      2024    16253
+76      1985    17247
+77      1943    18329
+78      1901    19503
+79      1861    20786
+80      1821    22185
+81      1782    23715
+82      1736    25385
+83      1694    27207
+84      1659    29190
+85      1615    31344
+86      1568    33679
+87      1523    36203
+88      1479    38925
+89      1434    41846
+90      1393    44965
+91      1353    48285
+92      1310    51814
+93      1269    55527
+94      1230    59410
+95      1188    63468
+96      1148    67711
+97      1107    72153
+98      1067    76815
+100     1026.19016255607 
+```
+I want to figure out if this new assembly is better or worse than my previous assembly, which was assembled from all ten samples. It's possible that having more samples creates more "depth" which could help me assemble transcripts more completely. I already have an abundance file for this transcriptome (I had to estimate counts for all samples using kallisto and then combine the counts into a single file with a column for each sample).
+
+```
+#!/bin/sh
+#SBATCH --job-name=trinity_ExN50
+#SBATCH --cpus-per-task=1
+#SBATCH --time=2:00:00
+#SBATCH --mem=24gb
+#SBATCH --output=trinity_ExN50.%J.out
+#SBATCH --error=trinity_ExN50.%J.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
 
 
+/home/samp/projects/rrg-ben/for_Sam/trinity_ben/trinityrnaseq-v2.15.2/util/misc/contig_ExN50_statistic.pl \
+        /home/samp/projects/rrg-ben/for_Sam/muel/kallisto_fully_trimmed/muel_kallisto_countz_fully_trimmed.isoform.TMM.EXPR.matrix \
+        /home/samp/projects/rrg-ben/for_Sam/muel/sam_trinity_assembly/Trinity.fasta \
+        gene | tee trinity_ExN50.gene.stats
 
+#you can do this at the transcript level or gene level... just use the command "gene" or "transcript" before the pipe to specify the target
+
+```
+It turns out this transcriptome is *much* less fragmented, despite having more than 560000 transcripts. The ExN50 value peaks at around Ex93. Apparently these many transcripts are not fragmented, they are just independantly assembled alleles or isoforms. 
 
 
 
