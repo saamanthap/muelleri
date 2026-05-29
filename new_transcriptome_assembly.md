@@ -306,8 +306,43 @@ I want to figure out if this new assembly is better or worse than my previous as
 #you can do this at the transcript level or gene level... just use the command "gene" or "transcript" before the pipe to specify the target
 
 ```
-It turns out this transcriptome is *much* less fragmented, despite having more than 560000 transcripts. The ExN50 value peaks at around Ex93. Apparently these many transcripts are not fragmented, they are just independantly assembled alleles or isoforms. 
+It turns out this transcriptome is *much* less fragmented, despite having more than 560000 transcripts. The ExN50 value peaks at around Ex93. Apparently these many transcripts are not fragmented, they are just independantly assembled alleles or isoforms.  
 
+Another thing I want to try is running the single-sample assembly _again_ without the --jaccard_clip flag. It's possible that this flag (which is supposed to help prevent chimeric transcripts) makes Trinity too conservative about assembling fragments. I will leave --jaccard_clip in for now, and instead add --min_glue 1 (the default is 2) which should string more inchworm contigs together. However this change will allegedly be very memory intensive, so I'll add some more memory too:
+
+```
+#!/bin/sh
+#SBATCH --job-name=trinity2_minglue1
+#SBATCH --cpus-per-task=32
+#SBATCH --time=168:00:00
+#SBATCH --mem=400G
+#SBATCH --output=trinity2_minglue1.%J.out
+#SBATCH --error=trinity2_minglue1.%J.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+module load StdEnv/2020
+module load gcc/9.3.0 openmpi/4.0.3
+module load trinity/2.14.0 samtools/1.17 jellyfish/2.3.0
+module load salmon/1.4.0
+module load python/3
+module load scipy-stack/2023a
+
+Trinity --seqType fq \
+        --max_memory 200G \
+        --CPU ${SLURM_CPUS_PER_TASK} \
+        --full_cleanup \
+        --min_kmer_cov 2 \
+        --min_glue 1 \
+        --bflyCalculateCPU \
+        --jaccard_clip \
+        --left /home/samp/projects/rrg-ben/for_Sam/muel/bbduk_trimmed/X_muelleri_tad39_S19_L001_R1_bbduk.fastq.gz \
+        --right /home/samp/projects/rrg-ben/for_Sam/muel/bbduk_trimmed/X_muelleri_tad39_S19_L001_R2_bbduk.fastq.gz \
+        --output /home/samp/projects/rrg-ben/for_Sam/muel/trinity_tad39/trinity_tad31_minglue1
+
+
+```
 
 
 Next, I want to assemble a transcriptome for a male individual. Once I have this assembly, I can use reciprocal best blast hits to collapse the transcriptomes together in order to find sex-shared and sex-specific transcripts. In order to assemble the male transcriptome, just choose the male sample with the most reads, and run the assembly script from above.  
