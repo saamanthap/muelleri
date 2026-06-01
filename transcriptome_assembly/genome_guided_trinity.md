@@ -43,6 +43,12 @@ STAR --genomeDir ${ref} \
 --outFilterMatchNminOverLread 0.5 \
         --readFilesCommand zcat
 ```
-Since Trinity only accepts a single bam file as input, you need to merge the bams into one before you can actually do the assembly: 
+Since Trinity only accepts a single bam file as input, you need to add readgroups, then merge the bams into one before you can actually do the assembly. Start by adding ReadGroups:
 ```
-
+```
+Then merge into a single file:
+```
+```
+Now assemble:
+```
+```
