@@ -1,5 +1,5 @@
 ## How to do a Trinity guided assembly
-Instructions on the Trinity [Github page](https://github.com/trinityrnaseq/trinityrnaseq/wiki/Genome-Guided-Trinity-Transcriptome-Assembly). To perform a guided assembly, you need an input bamfile (the result of your RNASeq reads mapped to an appropriate reference genome). I'm going to align my reads again, since I have recently done a better job trimming them. I'll use STAR (which is splice-aware) and align to the borealis reference:
+Instructions on the Trinity [Github page](https://github.com/trinityrnaseq/trinityrnaseq/wiki/Genome-Guided-Trinity-Transcriptome-Assembly). To perform a guided assembly, you need an input bamfile (the result of your RNASeq reads mapped to an appropriate reference genome). Guided transcriptome assembly is only a good idea if you have a relatively complete reference genome (a highly fragmented reference genome will not work.) I'm going to align my reads again, since I have recently done a better job trimming them. I'll use STAR (which is splice-aware) and align to the borealis reference:
 ```
 #!/bin/sh
 #SBATCH --job-name=STAR_map
