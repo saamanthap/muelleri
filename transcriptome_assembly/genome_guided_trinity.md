@@ -45,6 +45,39 @@ STAR --genomeDir ${ref} \
 ```
 Since Trinity only accepts a single bam file as input, you need to add readgroups, then merge the bams into one before you can actually do the assembly. Start by adding ReadGroups:
 ```
+#!/bin/bash
+#SBATCH --job-name=readgroups
+#SBATCH --array=0-9
+#SBATCH --cpus-per-task=1
+#SBATCH --time=6:00:00
+#SBATCH --mem=24gb
+#SBATCH --output=readgroups.%J.%a.out
+#SBATCH --error=readgroups.%J.%a.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
+
+module load StdEnv/2023 gatk/4.6.1.0
+
+
+#load bams into array (run from the folder than contains bams)
+bams=( ./*Aligned.sortedByCoord.out.bam )
+
+
+in=${bams[$SLURM_ARRAY_TASK_ID]}
+sample_name=$(basename $input_file Aligned.sortedByCoord.out.bam)
+
+module load StdEnv/2023  picard/3.1.0
+
+gatk AddOrReplaceReadGroups \
+        -I ${in} \
+        -O ${sample_name}_rg.bam \
+        -RGID ID_${sample_name} \
+        -RGLB lib_${sample_name} \
+        -RGPL "Illumina" \
+        -RGPU unit_${sample_name} \
+        -RGSM ${sample_name} \
+        --CREATE_INDEX true
 ```
 Then merge into a single file:
 ```
