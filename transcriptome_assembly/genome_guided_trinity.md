@@ -124,7 +124,31 @@ samtools sort -o ${in//.bam/_sorted.bam} ${in}
 
 samtools index ${in//.bam/_sorted.bam}
 ```
-Now assemble:
+Now assemble. You need to choose an appropriate value for 
 ```
+#!/bin/sh
+#SBATCH --job-name=trinity_guided_assembly
+#SBATCH --cpus-per-task=32
+#SBATCH --time=168:00:00
+#SBATCH --mem=250G
+#SBATCH --output=trinity_guided_assembly.%J.out
+#SBATCH --error=trinity_guided_assembly.%J.err
+#SBATCH --account=def-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN,END,FAIL
 
+module load StdEnv/2020
+module load gcc/9.3.0 openmpi/4.0.3
+module load trinity/2.14.0 samtools/1.17 jellyfish/2.3.0
+module load salmon/1.4.0
+module load python/3
+module load scipy-stack/2023a
+
+bam=${1}
+
+Trinity --genome_guided_bam ${bam} \
+        --genome_guided_max_intron 20000 \
+        --max_memory 200G \
+        --CPU ${SLURM_CPUS_PER_TASK} \
+        --output /home/samp/projects/rrg-ben/for_Sam/muel/sam_trinity_assembly/trinity_guided_assembly/
 ```
