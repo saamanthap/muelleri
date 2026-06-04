@@ -51,8 +51,8 @@ Since Trinity only accepts a single bam file as input, you need to add readgroup
 #SBATCH --cpus-per-task=1
 #SBATCH --time=6:00:00
 #SBATCH --mem=24gb
-#SBATCH --output=readgroups.%J.%a.out
-#SBATCH --error=readgroups.%J.%a.err
+#SBATCH --output=readgroups.%J.out
+#SBATCH --error=readgroups.%J.err
 #SBATCH --account=rrg-ben
 #SBATCH --mail-user=pottss5@mcmaster.ca
 #SBATCH --mail-type=BEGIN,END,FAIL
