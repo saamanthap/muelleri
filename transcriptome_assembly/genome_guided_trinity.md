@@ -81,7 +81,70 @@ gatk AddOrReplaceReadGroups \
 ```
 Then merge into a single file:
 ```
+#!/bin/sh
+#SBATCH --job-name=samtools_merge
+#SBATCH --cpus-per-task=10
+#SBATCH --time=8:00:00
+#SBATCH --mem=50gb
+#SBATCH --output=samtools_merge.%J.%a.out
+#SBATCH --error=samtools_merge.%J.%a.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+
+module load StdEnv/2023 samtools/1.22.1
+
+bam_list=${1}
+out_name=${2} #X_muelleri_alltads_merged.bam
+
+samtools merge -b ${bam_list} -o ${out_name} --threads ${SLURM_CPUS_PER_TASK}
+```
+And sort:
+```
+#!/bin/sh
+#SBATCH --job-name=samtools_merge
+#SBATCH --cpus-per-task=10
+#SBATCH --time=8:00:00
+#SBATCH --mem=50gb
+#SBATCH --output=samtools_merge.%J.%a.out
+#SBATCH --error=samtools_merge.%J.%a.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+
+module load StdEnv/2023 samtools/1.22.1
+
+bam_list=${1}
+out_name=${2} #X_muelleri_alltads_merged.bam
+
+samtools merge -b ${bam_list} -o ${out_name} --threads ${SLURM_CPUS_PER_TASK}
+[samp@l4.nibi ben_scripts]$ cat wip_samtools_sort
+#!/bin/sh
+#SBATCH --job-name=samtools_sort
+#SBATCH --time=4:00:00
+#SBATCH --mem=24gb
+#SBATCH --cpus-per-task=1
+#SBATCH --output=samtools_sort.%J.out
+#SBATCH --error=samtools_sort.%J.err
+#SBATCH --account=rrg-ben
+#SBATCH --mail-user=pottss5@mcmaster.ca
+#SBATCH --mail-type=BEGIN
+#SBATCH --mail-type=END
+#SBATCH --mail-type=FAIL
+
+module load StdEnv/2023 samtools/1.22.1
+
+in=${1}
+
+samtools sort -o ${in//.bam/_sorted.bam} ${in}
+
+samtools index ${in//.bam/_sorted.bam}
 ```
 Now assemble:
 ```
+
 ```
